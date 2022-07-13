@@ -2,7 +2,10 @@ const queries = {
   SQL_SEL_WM_OBJECTS: `
   SELECT
     Id,
-    Mac
+    Mac,
+    Name,
+    Latitude,
+    Longitude
   FROM
     WmObjects`,
 };
