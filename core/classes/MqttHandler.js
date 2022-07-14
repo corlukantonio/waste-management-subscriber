@@ -1,3 +1,5 @@
+// @ts-check
+
 const mqtt = require('mqtt');
 
 // Core - Classes
@@ -11,12 +13,32 @@ const commonData = require('../commonData');
  * Class for MQTT handling.
  */
 class MqttHandler {
+  // /**
+  //  * URL.
+  //  *
+  //  * @type {string}
+  //  */
   // #url = process.env.CLOUDMQTT_URL || 'mqtt://localhost:1883';
 
-  // #client = mqtt.connect(mqttUrl);
+  // /**
+  //  * MQTT client.
+  //  *
+  //  * @type {mqtt.Client}
+  //  */
+  // #client = mqtt.connect(this.#url);
 
+  /**
+   * MQTT server URL.
+   *
+   * @type {string}
+   */
   #url = 'mqtt://driver.cloudmqtt.com';
 
+  /**
+   * MQTT client.
+   *
+   * @type {mqtt.Client}
+   */
   #client = mqtt.connect(this.#url, {
     clean: true,
     port: 18850,
@@ -43,38 +65,67 @@ class MqttHandler {
             switch (topic) {
               case commonData.MQTT_TOPICS[0]:
                 if (msg[0] == commonData.OBJ_REG_REQ_PKG) {
+                  if (msg[1] == 0x01) {
+                  }
                 }
                 break;
 
               case commonData.MQTT_TOPICS[1]:
                 if (msg[0] == commonData.OBJ_ACT_REQ_PKG) {
+                  if (msg[1] == 0x01) {
+                  }
                 }
                 break;
 
               case commonData.MQTT_TOPICS[2]:
                 if (msg[0] == commonData.OBJ_REC_CFG_REQ_PKG) {
+                  if (msg[1] == 0x01) {
+                  }
                 }
                 break;
 
               case commonData.MQTT_TOPICS[3]:
                 if (msg[0] == commonData.OBJ_REC_CFG_APV_REQ_PKG) {
+                  if (msg[1] == 0x01) {
+                  }
                 }
                 break;
 
               case commonData.MQTT_TOPICS[4]:
                 if (msg[0] == commonData.OBJ_REC_BASE_PKG) {
-                  dbHandler.execSql(dbHandler.sqlSelWmObjects);
+                  if (msg[1] == 0x01) {
+                    dbHandler.execSql(dbHandler.sqlSelWmObjects);
 
-                  dbHandler.sqlSelWmObjects.on('doneProc', () => {
-                    console.log(dbHandler.wmObjects[0].Mac);
+                    dbHandler.sqlSelWmObjects.on('doneProc', async () => {
+                      console.log(dbHandler.wmObjects[0].Mac);
 
-                    console.log(packageParser.getParsedPackage(msg).distance);
-                    console.log(packageParser.getParsedPackage(msg).humidity);
-                    console.log(
-                      packageParser.getParsedPackage(msg).temperatureCelsius
-                    );
-                    console.log(packageParser.getParsedPackage(msg).rssi);
-                  });
+                      console.log(
+                        packageParser.getObjectRecordBasePackageV1(msg).mac
+                      );
+                      console.log(
+                        packageParser.getObjectRecordBasePackageV1(msg).rtc
+                      );
+                      console.log(
+                        packageParser.getObjectRecordBasePackageV1(msg)
+                          .numberOfValues
+                      );
+                      console.log(
+                        packageParser.getObjectRecordBasePackageV1(msg).values
+                          .distance
+                      );
+                      console.log(
+                        packageParser.getObjectRecordBasePackageV1(msg).values
+                          .humidity
+                      );
+                      console.log(
+                        packageParser.getObjectRecordBasePackageV1(msg).values
+                          .temperatureCelsius
+                      );
+                      console.log(
+                        packageParser.getObjectRecordBasePackageV1(msg).rssi
+                      );
+                    });
+                  }
                 }
                 break;
 

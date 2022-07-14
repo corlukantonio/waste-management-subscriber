@@ -1,12 +1,33 @@
+// @ts-check
+
 const tedious = require('tedious');
 
 // Core - Data
 const queries = require('../queries');
 
 /**
+ * @typedef DbConfig
+ * @type {object}
+ * @prop {string} server - Server name
+ * @prop {object} authentication - Auth data.
+ * @prop {string} authentication.type - Auth type.
+ * @prop {object} authentication.options - Auth options.
+ * @prop {string} authentication.options.userName - Username.
+ * @prop {string} authentication.options.password - Password.
+ * @prop {object} options - Options.
+ * @prop {boolean} options.encrypt - Encrypt.
+ * @prop {string} options.database - Database.
+ */
+
+/**
  * Class for database handling.
  */
 class DbHandler {
+  /**
+   * Database config data.
+   *
+   * @type {DbConfig}
+   */
   #config = {
     server: 'waste-management.database.windows.net',
     authentication: {
@@ -22,14 +43,29 @@ class DbHandler {
     },
   };
 
+  /**
+   * Connection.
+   *
+   * @type {tedious.Connection}
+   */
   #conn = new tedious.Connection(this.#config);
 
   constructor() {
+    /**
+     * WmObjects.
+     *
+     * @type {Array.<{Id: Number, Mac: Buffer, Name: String, Latitude: Number, Longitude: Number}>}
+     */
     this.wmObjects = [];
 
+    /**
+     * SQL query - Select WmObjects.
+     *
+     * @type {tedious.Request}
+     */
     this.sqlSelWmObjects = new tedious.Request(
       queries.SQL_SEL_WM_OBJECTS,
-      async (err, rowCount) => {
+      async (err) => {
         if (err) console.log(err.message);
       }
     );
