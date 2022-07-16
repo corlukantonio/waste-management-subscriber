@@ -85,9 +85,6 @@ class DbHandler {
       case queries.SQL_INS_WM_RECORD:
         req.addParameter('Data', TYPES.VarBinary, args[0], { length: 'max' });
         req.addParameter('WmObjectId', TYPES.Int, args[1]);
-        req.addParameter('CreatedAt', TYPES.DateTime2, new Date(Date.now()), {
-          length: 7,
-        });
 
         req.on('row', async (columns) => {
           columns.forEach(async (column) => {
