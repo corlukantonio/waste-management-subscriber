@@ -16,13 +16,12 @@ const queries = {
   INSERT INTO
     WmRecords (
       Data,
-      WmObjectId,
-      CreatedAt
+      WmObjectId
     )
   OUTPUT
     INSERTED.Id
   VALUES
-    (@Data, @WmObjectId, @CreatedAt);
+    (@Data, @WmObjectId);
   `,
 };
 
