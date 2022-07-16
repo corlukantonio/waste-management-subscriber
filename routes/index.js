@@ -1,16 +1,18 @@
+// @ts-check
+
 //#region Imports
 
 const express = require('express');
 const router = express.Router();
 const url = require('url');
 
-// Core - Classes
-const DbHandler = require('../core/classes/DbHandler');
-const MqttHandler = require('../core/classes/MqttHandler');
-const PackageParser = require('../core/classes/PackageParser');
+// Core - Logic
+const DbHandler = require('../core/logic/DbHandler');
+const MqttHandler = require('../core/logic/MqttHandler');
+const PackageParser = require('../core/logic/PackageParser');
 
 // Core - Data
-const commonData = require('../core/commonData');
+const common = require('../core/data/common');
 
 //#endregion
 
@@ -27,31 +29,29 @@ mqttHandler.connect(dbHandler, packageParser);
  */
 
 router.get('/', (req, res, next) => {
-  let config = url.parse(mqttHandler.mqttUrl);
+  let config = url.parse(mqttHandler.getUrl());
 
-  config.topic = commonData.MQTT_TOPICS[4];
+  config.topic = common.MQTT_TOPICS[5];
 
   res.render('index', {
-    connected: mqttHandler.mqttClient.connected,
+    connected: mqttHandler.getClient().connected,
     config: config,
   });
 });
 
 router.post('/publish', function (req, res) {
-  var msg = JSON.stringify({
+  let msg = JSON.stringify({
     date: new Date().toString(),
     msg: req.body.msg,
   });
 
-  mqttHandler.mqttClient.publish(commonData.MQTT_TOPICS[4], msg, function () {
+  mqttHandler.getClient().publish(common.MQTT_TOPICS[5], msg, function () {
     res.writeHead(204, { Connection: 'keep-alive' });
     res.end();
   });
 });
 
 router.get('/stream', function (req, res) {
-  // send headers for event-stream connection
-  // see spec for more information
   res.writeHead(200, {
     'Content-Type': 'text/event-stream',
     'Cache-Control': 'no-cache',
@@ -60,9 +60,16 @@ router.get('/stream', function (req, res) {
   res.write('\n');
 
   // Timeout timer, send a comment line every 20 sec
-  var timer = setInterval(function () {
+  let timer = setInterval(function () {
     res.write('event: ping' + '\n\n');
   }, 20000);
+
+  mqttHandler.getClient().subscribe(common.MQTT_TOPICS[5], async () => {
+    mqttHandler.getClient().on('message', function (topic, msg, pkt) {
+      var json = JSON.parse(msg);
+      res.write('data: ' + json.date + ': ' + json.msg + '\n\n');
+    });
+  });
 });
 
 module.exports = router;
