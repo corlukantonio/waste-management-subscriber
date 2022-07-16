@@ -64,11 +64,11 @@ router.get('/stream', function (req, res) {
     res.write('event: ping' + '\n\n');
   }, 20000);
 
-  mqttHandler.getClient().subscribe(common.MQTT_TOPICS[5], async () => {
-    mqttHandler.getClient().on('message', function (topic, msg, pkt) {
-      var json = JSON.parse(msg);
+  mqttHandler.getClient().on('message', function (topic, msg, pkt) {
+    if (topic == common.MQTT_TOPICS[5]) {
+      let json = JSON.parse(msg);
       res.write('data: ' + json.date + ': ' + json.msg + '\n\n');
-    });
+    }
   });
 });
 
