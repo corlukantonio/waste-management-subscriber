@@ -30,10 +30,24 @@ const common = {
     OBJ_REC_BASE_PKG: 0x05,
   },
 
+  PKG_LENGTHS: {
+    V1: {
+      OBJ_REG_REQ_PKG: 15,
+      OBJ_ACT_REQ_PKG: 19,
+      OBJ_REC_BASE_PKG: 18,
+    },
+  },
+
   VAL_TYPES: {
     DISTANCE: 0x01,
     HUMIDITY: 0x02,
     TEMPERATURE_CELSIUS: 0x03,
+  },
+
+  VAL_LENGTHS: {
+    DISTANCE: 9,
+    HUMIDITY: 9,
+    TEMPERATURE_CELSIUS: 9,
   },
 };
 

@@ -11,7 +11,24 @@
  */
 
 /**
+ * @typedef PackageLengths
+ * @type {object}
+ * @prop {object} V1 - Version 1.
+ * @prop {number} V1.OBJ_REG_REQ_PKG - ObjectRegistrationRequestPackage.
+ * @prop {number} V1.OBJ_ACT_REQ_PKG - ObjectActivationRequestPackage.
+ * @prop {number} V1.OBJ_REC_BASE_PKG - ObjectRecordBasePackage.
+ */
+
+/**
  * @typedef ValueTypes
+ * @type {object}
+ * @prop {number} DISTANCE - Distance.
+ * @prop {number} HUMIDITY - Humidity.
+ * @prop {number} TEMPERATURE_CELSIUS - Temperature (celsius).
+ */
+
+/**
+ * @typedef ValueLengths
  * @type {object}
  * @prop {number} DISTANCE - Distance.
  * @prop {number} HUMIDITY - Humidity.
@@ -23,7 +40,9 @@
  * @type {object}
  * @prop {Array.<String>} MQTT_TOPICS - MQTT topics.
  * @prop {PackageTypes} PKG_TYPES - Package types.
+ * @prop {PackageLengths} PKG_LENGTHS - Package lengths.
  * @prop {ValueTypes} VAL_TYPES - Value types.
+ * @prop {ValueLengths} VAL_LENGTHS - Value lengths.
  */
 
 /**
@@ -45,9 +64,29 @@
  * @type {object}
  * @prop {number} Id - ID.
  * @prop {Buffer} Mac - MAC.
- * @prop {string} Name - Name.
- * @prop {number} Latitude - Latitude.
- * @prop {number} Longitude - Longitude.
+ * @prop {boolean} IsActivated - Is activated.
+ * @prop {Buffer} ActivationCode - Activation code.
+ */
+
+/**
+ * @typedef ObjectRegistrationRequest
+ * @type {object}
+ * @prop {number} packageType - Package type.
+ * @prop {number} packageVersion - Package version.
+ * @prop {Buffer} mac - MAC.
+ * @prop {Array.<Number>} rtc - RTC.
+ * @prop {number} crc - CRC.
+ */
+
+/**
+ * @typedef ObjectActivationRequest
+ * @type {object}
+ * @prop {number} packageType - Package type.
+ * @prop {number} packageVersion - Package version.
+ * @prop {Buffer} mac - MAC.
+ * @prop {Array.<Number>} rtc - RTC.
+ * @prop {Buffer} activationCode - Activation code.
+ * @prop {number} crc - CRC.
  */
 
 /**
