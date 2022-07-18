@@ -74,9 +74,31 @@ class DbHandler {
           this.#wmObjects.push({
             Id: columns[0].value,
             Mac: columns[1].value,
-            Name: columns[2].value,
-            Latitude: columns[3].value,
-            Longitude: columns[4].value,
+            IsActivated: columns[2].value,
+            ActivationCode: columns[3].value,
+          });
+        });
+
+        break;
+
+      case queries.SQL_INS_WM_OBJECT:
+        req.addParameter('Guid', TYPES.Binary, args[0], { length: 36 });
+        req.addParameter('Mac', TYPES.Binary, args[1], { length: 6 });
+        req.addParameter('Name', TYPES.VarChar, args[2], { length: 50 });
+        req.addParameter('ActivationCode', TYPES.Binary, args[3], {
+          length: 4,
+        });
+        req.addParameter('WmGroupId', TYPES.Int, 1);
+
+        req.on('row', async (columns) => {
+          columns.forEach(async (column) => {
+            if (column.value === null) {
+              console.log('NULL');
+            } else {
+              console.log(
+                'Inserted a new WmObject with Id value: ' + column.value
+              );
+            }
           });
         });
 
@@ -96,6 +118,16 @@ class DbHandler {
               );
             }
           });
+        });
+
+        break;
+
+      case queries.SQL_UPD_WM_OBJECT_IS_ACTIVATED_BY_ID:
+        req.addParameter('IsActivated', TYPES.Bit, args[0]);
+        req.addParameter('Id', TYPES.Int, args[1]);
+
+        req.on('requestCompleted', async () => {
+          console.log('Updated WmObject with Id value: ' + args[1]);
         });
 
         break;

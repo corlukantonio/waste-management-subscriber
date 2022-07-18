@@ -15,6 +15,117 @@ class PackageParser {
   constructor() {}
 
   /**
+   * Get object registration request (v1).
+   *
+   * @param {Buffer} buff Buffer.
+   * @return {typedefs.ObjectRegistrationRequest} Object registration request.
+   */
+  objectRegistrationRequestV1(buff) {
+    /**
+     * Parsed package.
+     *
+     * @type {typedefs.ObjectRegistrationRequest}
+     */
+    let parsedPackage = {
+      packageType: 0x00,
+      packageVersion: 0x00,
+      mac: Buffer.from([0x00, 0x00, 0x00, 0x00, 0x00, 0x00]),
+      rtc: [0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
+      crc: 0x00,
+    };
+
+    /**
+     * Counter.
+     *
+     * @type {number}
+     */
+    let i = 0;
+
+    if (buff.byteLength > 0) {
+      parsedPackage.packageType = buff[i++];
+      parsedPackage.packageVersion = buff[i++];
+      parsedPackage.mac = Buffer.from([
+        buff[i++],
+        buff[i++],
+        buff[i++],
+        buff[i++],
+        buff[i++],
+        buff[i++],
+      ]);
+      parsedPackage.rtc = [
+        buff[i++],
+        buff[i++],
+        buff[i++],
+        buff[i++],
+        buff[i++],
+        buff[i++],
+      ];
+      parsedPackage.crc = buff[i];
+    }
+
+    return parsedPackage;
+  }
+
+  /**
+   * Get object activation request (v1).
+   *
+   * @param {Buffer} buff Buffer.
+   * @return {typedefs.ObjectActivationRequest} Object activation request.
+   */
+  getObjectActivationRequestV1(buff) {
+    /**
+     * Parsed package.
+     *
+     * @type {typedefs.ObjectActivationRequest}
+     */
+    let parsedPackage = {
+      packageType: 0x00,
+      packageVersion: 0x00,
+      mac: Buffer.from([0x00, 0x00, 0x00, 0x00, 0x00, 0x00]),
+      rtc: [0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
+      activationCode: Buffer.from([0x00, 0x00, 0x00, 0x00]),
+      crc: 0x00,
+    };
+
+    /**
+     * Counter.
+     *
+     * @type {number}
+     */
+    let i = 0;
+
+    if (buff.byteLength > 0) {
+      parsedPackage.packageType = buff[i++];
+      parsedPackage.packageVersion = buff[i++];
+      parsedPackage.mac = Buffer.from([
+        buff[i++],
+        buff[i++],
+        buff[i++],
+        buff[i++],
+        buff[i++],
+        buff[i++],
+      ]);
+      parsedPackage.rtc = [
+        buff[i++],
+        buff[i++],
+        buff[i++],
+        buff[i++],
+        buff[i++],
+        buff[i++],
+      ];
+      parsedPackage.activationCode = Buffer.from([
+        buff[i++],
+        buff[i++],
+        buff[i++],
+        buff[i++],
+      ]);
+      parsedPackage.crc = buff[i];
+    }
+
+    return parsedPackage;
+  }
+
+  /**
    * Get object record (v1).
    *
    * @param {Buffer} buff Buffer.
@@ -27,16 +138,12 @@ class PackageParser {
      * @type {typedefs.ObjectRecord}
      */
     let parsedPackage = {
-      packageType: 0,
-      packageVersion: 0,
+      packageType: 0x00,
+      packageVersion: 0x00,
       mac: Buffer.from([0x00, 0x00, 0x00, 0x00, 0x00, 0x00]),
       rtc: [0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
       numberOfValues: 0,
-      values: {
-        distance: 0,
-        humidity: 0,
-        temperatureCelsius: 0,
-      },
+      values: {},
       rssi: 0,
       crc: 0x00,
     };
@@ -49,7 +156,7 @@ class PackageParser {
     let i = 0;
 
     if (buff.byteLength > 0) {
-      parsedPackage.packageVersion = buff[i++];
+      parsedPackage.packageType = buff[i++];
       parsedPackage.packageVersion = buff[i++];
       parsedPackage.mac = Buffer.from([
         buff[i++],
@@ -100,6 +207,7 @@ class PackageParser {
               buff[i++],
               buff[i++],
             ]).readDoubleLE(0);
+
             break;
 
           case common.VAL_TYPES.TEMPERATURE_CELSIUS:
@@ -115,6 +223,7 @@ class PackageParser {
               buff[i++],
               buff[i++],
             ]).readDoubleLE(0);
+
             break;
 
           default:
@@ -127,6 +236,62 @@ class PackageParser {
     }
 
     return parsedPackage;
+  }
+
+  /**
+   * Get object record (v1) values length.
+   *
+   * @param {Buffer} buff Buffer.
+   * @return {number} Values length.
+   */
+  getObjectRecordV1ValuesLength(buff) {
+    /**
+     * Counter.
+     *
+     * @type {number}
+     */
+    let i = 14;
+
+    /**
+     * Length.
+     *
+     * @type {number}
+     */
+    let length = 0;
+
+    /**
+     * Number of values.
+     *
+     * @type {number}
+     */
+    let numberOfValues = buff[i++];
+
+    for (let j = 0; j < numberOfValues; j++) {
+      switch (buff[i]) {
+        case common.VAL_TYPES.DISTANCE:
+          i += common.VAL_LENGTHS.DISTANCE;
+          length += common.VAL_LENGTHS.DISTANCE;
+
+          break;
+
+        case common.VAL_TYPES.HUMIDITY:
+          i += common.VAL_LENGTHS.HUMIDITY;
+          length += common.VAL_LENGTHS.HUMIDITY;
+
+          break;
+
+        case common.VAL_TYPES.TEMPERATURE_CELSIUS:
+          i += common.VAL_LENGTHS.TEMPERATURE_CELSIUS;
+          length += common.VAL_LENGTHS.TEMPERATURE_CELSIUS;
+
+          break;
+
+        default:
+          break;
+      }
+    }
+
+    return length;
   }
 }
 
