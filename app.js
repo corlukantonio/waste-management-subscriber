@@ -2,16 +2,19 @@
 
 //#region Imports
 
-var bodyParser = require('body-parser');
-var cookieParser = require('cookie-parser');
-var express = require('express');
-var favicon = require('serve-favicon');
-var logger = require('morgan');
-var path = require('path');
+const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
+const express = require('express');
+const favicon = require('serve-favicon');
+const logger = require('morgan');
+const path = require('path');
+
+// Core - Logic
+const DbHandler = require('./core/logic/DbHandler');
 
 //#endregion
 
-var app = express();
+const app = express();
 
 /**
  * View engine setup.
@@ -58,6 +61,8 @@ app.use(function (err, req, res, next) {
 });
 
 process.on('SIGINT', async () => {
+  DbHandler.getInstance().closeConn();
+
   console.log('Goodbye!');
 
   process.exit(1);

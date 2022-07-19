@@ -20,6 +20,7 @@ const common = {
     'iot/wm/recapp',
     'iot/wm/record',
     'iot/wm/subscriber',
+    'iot/wm/response/',
   ],
 
   PKG_TYPES: {

@@ -1,0 +1,50 @@
+// @ts-check
+
+/**
+ * Class for log handling.
+ */
+class LogHandler {
+  /**
+   * One and only instance of the class.
+   *
+   * @type {LogHandler}
+   */
+  static #instance;
+
+  /**
+   * @private
+   */
+  constructor() {}
+
+  /**
+   * Get class instance.
+   *
+   * @return {LogHandler} Instance.
+   */
+  static getInstance() {
+    if (!LogHandler.#instance) {
+      LogHandler.#instance = new LogHandler();
+    }
+
+    return LogHandler.#instance;
+  }
+
+  /**
+   * Get log message.
+   *
+   * @param {...*} args Arguments.
+   * @return {string} Log.
+   */
+  getLogMessage(...args) {
+    /**
+     * Log message.
+     *
+     * @type {string}
+     */
+    let logMessage = '';
+
+    return logMessage;
+  }
+}
+
+module.exports = LogHandler;
