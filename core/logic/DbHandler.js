@@ -15,6 +15,13 @@ const typedefs = require('../data/typedefs');
  */
 class DbHandler {
   /**
+   * One and only instance of the class.
+   *
+   * @type {DbHandler}
+   */
+  static #instance;
+
+  /**
    * Database config data.
    *
    * @type {typedefs.DbConfig}
@@ -48,6 +55,9 @@ class DbHandler {
    */
   #wmObjects = [];
 
+  /**
+   * @private
+   */
   constructor() {
     /**
      * Get WmObjects.
@@ -55,6 +65,19 @@ class DbHandler {
      * @return {Array.<typedefs.WmObject>} WmObjects.
      */
     this.getWmObjects = () => this.#wmObjects;
+  }
+
+  /**
+   * Get class instance.
+   *
+   * @return {DbHandler} Instance.
+   */
+  static getInstance() {
+    if (!DbHandler.#instance) {
+      DbHandler.#instance = new DbHandler();
+    }
+
+    return DbHandler.#instance;
   }
 
   /**
@@ -153,11 +176,24 @@ class DbHandler {
       );
     });
 
+    this.#conn.on('end', async () => {
+      console.log('Database connection closed.');
+    });
+
     this.#conn.on('error', async (err) => {
       if (err) console.log(err.message);
     });
 
     this.#conn.connect();
+  }
+
+  /**
+   * Close connection.
+   *
+   * @return {void}
+   */
+  closeConn() {
+    this.#conn.close();
   }
 }
 

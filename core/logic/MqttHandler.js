@@ -15,7 +15,7 @@ const PackageParser = require('./PackageParser');
 const common = require('../data/common');
 const queries = require('../data/queries');
 const typedefs = require('../data/typedefs');
-const { query } = require('express');
+const { MQTT_TOPICS } = require('../data/common');
 
 //#endregion
 
@@ -23,6 +23,13 @@ const { query } = require('express');
  * Class for MQTT handling.
  */
 class MqttHandler {
+  /**
+   * One and only instance of the class.
+   *
+   * @type {MqttHandler}
+   */
+  static #instance;
+
   // /**
   //  * URL.
   //  *
@@ -99,6 +106,9 @@ class MqttHandler {
     crc: 0x00,
   };
 
+  /**
+   * @private
+   */
   constructor() {
     /**
      * Get URL.
@@ -113,6 +123,19 @@ class MqttHandler {
      * @return {mqtt.Client} MQTT client.
      */
     this.getClient = () => this.#client;
+  }
+
+  /**
+   * Get class instance.
+   *
+   * @return {MqttHandler} Instance.
+   */
+  static getInstance() {
+    if (!MqttHandler.#instance) {
+      MqttHandler.#instance = new MqttHandler();
+    }
+
+    return MqttHandler.#instance;
   }
 
   /**
@@ -149,15 +172,13 @@ class MqttHandler {
   /**
    * Connect to MQTT server.
    *
-   * @param {DbHandler} dbHandler Database handler.
-   * @param {PackageParser} packageParser Package parser.
    * @return {void}
    */
-  connect(dbHandler, packageParser) {
+  connect() {
     this.#client.on('connect', async () => {
       console.log('Connected to the "' + this.#url + '" MQTT broker.');
 
-      this.#client.subscribe(common.MQTT_TOPICS, async () => {
+      this.#client.subscribe(common.MQTT_TOPICS.slice(0, 6), async () => {
         this.#client.on('message', async (topic, msg) => {
           if (msg.byteLength > 0) {
             switch (topic) {
@@ -185,15 +206,17 @@ class MqttHandler {
                         let isObjectDuplicate = false;
 
                         this.#objectRegistrationRequest =
-                          packageParser.objectRegistrationRequestV1(msg);
+                          PackageParser.getInstance().objectRegistrationRequestV1(
+                            msg
+                          );
 
                         for (
                           let i = 0;
-                          i < dbHandler.getWmObjects().length;
+                          i < DbHandler.getInstance().getWmObjects().length;
                           i++
                         ) {
                           if (
-                            dbHandler
+                            DbHandler.getInstance()
                               .getWmObjects()
                               [i].Mac.equals(
                                 this.#objectRegistrationRequest.mac
@@ -204,7 +227,7 @@ class MqttHandler {
                         }
 
                         if (!isObjectDuplicate) {
-                          dbHandler.execSql(
+                          DbHandler.getInstance().execSql(
                             queries.SQL_INS_WM_OBJECT,
                             sqlInsWmObject,
                             Buffer.from(uuid.v4()),
@@ -215,7 +238,7 @@ class MqttHandler {
                         }
                       });
 
-                      dbHandler.execSql(
+                      DbHandler.getInstance().execSql(
                         queries.SQL_SEL_WM_OBJECTS,
                         sqlSelWmObjects
                       );
@@ -263,31 +286,34 @@ class MqttHandler {
 
                       sqlSelWmObjects.on('requestCompleted', async () => {
                         this.#objectActivationRequest =
-                          packageParser.getObjectActivationRequestV1(msg);
+                          PackageParser.getInstance().getObjectActivationRequestV1(
+                            msg
+                          );
 
                         for (
                           let i = 0;
-                          i < dbHandler.getWmObjects().length;
+                          i < DbHandler.getInstance().getWmObjects().length;
                           i++
                         ) {
                           if (
-                            dbHandler
+                            DbHandler.getInstance()
                               .getWmObjects()
                               [i].Mac.equals(
                                 this.#objectActivationRequest.mac
                               ) &&
-                            !dbHandler.getWmObjects()[i].IsActivated &&
-                            dbHandler
+                            !DbHandler.getInstance().getWmObjects()[i]
+                              .IsActivated &&
+                            DbHandler.getInstance()
                               .getWmObjects()
                               [i].ActivationCode.equals(
                                 this.#objectActivationRequest.activationCode
                               )
                           ) {
-                            dbHandler.execSql(
+                            DbHandler.getInstance().execSql(
                               queries.SQL_UPD_WM_OBJECT_IS_ACTIVATED_BY_ID,
                               sqlUpdWmObjectIsActivatedById,
                               true,
-                              dbHandler.getWmObjects()[i].Id
+                              DbHandler.getInstance().getWmObjects()[i].Id
                             );
 
                             break;
@@ -295,7 +321,7 @@ class MqttHandler {
                         }
                       });
 
-                      dbHandler.execSql(
+                      DbHandler.getInstance().execSql(
                         queries.SQL_SEL_WM_OBJECTS,
                         sqlSelWmObjects
                       );
@@ -343,7 +369,9 @@ class MqttHandler {
                     if (
                       msg.byteLength ===
                       common.PKG_LENGTHS.V1.OBJ_REC_BASE_PKG +
-                        packageParser.getObjectRecordV1ValuesLength(msg)
+                        PackageParser.getInstance().getObjectRecordV1ValuesLength(
+                          msg
+                        )
                     ) {
                       let sqlSelWmObjects = new Request(
                         queries.SQL_SEL_WM_OBJECTS,
@@ -361,29 +389,58 @@ class MqttHandler {
 
                       sqlSelWmObjects.on('requestCompleted', async () => {
                         this.#objectRecord =
-                          packageParser.getObjectRecordV1(msg);
+                          PackageParser.getInstance().getObjectRecordV1(msg);
 
                         for (
                           let i = 0;
-                          i < dbHandler.getWmObjects().length;
+                          i < DbHandler.getInstance().getWmObjects().length;
                           i++
                         ) {
                           if (
-                            dbHandler
+                            DbHandler.getInstance()
                               .getWmObjects()
                               [i].Mac.equals(this.#objectRecord.mac)
                           ) {
-                            if (dbHandler.getWmObjects()[i].IsActivated) {
-                              dbHandler.execSql(
+                            if (
+                              DbHandler.getInstance().getWmObjects()[i]
+                                .IsActivated
+                            ) {
+                              DbHandler.getInstance().execSql(
                                 queries.SQL_INS_WM_RECORD,
                                 sqlInsWmRecord,
                                 msg,
-                                dbHandler.getWmObjects()[i].Id
+                                DbHandler.getInstance().getWmObjects()[i].Id
                               );
+
+                              /**
+                               * Time.
+                               *
+                               * @type {string}
+                               */
+                              let time = '';
+
+                              /**
+                               * Date.
+                               *
+                               * @type {Date}
+                               */
+                              let date = new Date(Date.now());
+
+                              time += 'st ';
+                              time += date.getUTCFullYear() + ' ';
+                              time += date.getUTCMonth() + 1 + ' ';
+                              time += date.getUTCDate() + ' ';
+                              time += date.getUTCHours() + ' ';
+                              time += date.getUTCMinutes() + ' ';
+                              time += date.getUTCSeconds();
+
+                              console.log(time);
+
+                              // this.#client.publish(MQTT_TOPICS[6], )
                             } else {
                               console.log(
                                 'WmObject with Id value ' +
-                                  dbHandler.getWmObjects()[i].Id +
+                                  DbHandler.getInstance().getWmObjects()[i].Id +
                                   ' is not activated.'
                               );
                             }
@@ -393,7 +450,7 @@ class MqttHandler {
                         }
                       });
 
-                      dbHandler.execSql(
+                      DbHandler.getInstance().execSql(
                         queries.SQL_SEL_WM_OBJECTS,
                         sqlSelWmObjects
                       );
@@ -401,7 +458,9 @@ class MqttHandler {
                       console.log(
                         'Package length error! Expected ' +
                           (common.PKG_LENGTHS.V1.OBJ_REC_BASE_PKG +
-                            packageParser.getObjectRecordV1ValuesLength(msg)) +
+                            PackageParser.getInstance().getObjectRecordV1ValuesLength(
+                              msg
+                            )) +
                           ', got ' +
                           msg.byteLength +
                           '.'

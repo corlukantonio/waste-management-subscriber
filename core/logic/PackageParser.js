@@ -12,7 +12,30 @@ const typedefs = require('../data/typedefs');
  * Class for package parsing.
  */
 class PackageParser {
+  /**
+   * One and only instance of the class.
+   *
+   * @type {PackageParser}
+   */
+  static #instance;
+
+  /**
+   * @private
+   */
   constructor() {}
+
+  /**
+   * Get class instance.
+   *
+   * @return {PackageParser} Instance.
+   */
+  static getInstance() {
+    if (!PackageParser.#instance) {
+      PackageParser.#instance = new PackageParser();
+    }
+
+    return PackageParser.#instance;
+  }
 
   /**
    * Get object registration request (v1).
