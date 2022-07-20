@@ -1,19 +1,27 @@
 // @ts-check
 
+//#region Imports
+
+// Core - Data
+const common = require('./common');
+
+//#endregion
+
 const queries = {
   SQL_SEL_WM_OBJECTS: `
   SELECT
     Id,
     Mac,
     IsActivated,
-    ActivationCode
+    ActivationCode,
+    Settings
   FROM
-    WmObjects;
+    ${common.DB_TABLES.WM_OBJECTS};
   `,
 
   SQL_INS_WM_OBJECT: `
   INSERT INTO
-    WmObjects (
+    ${common.DB_TABLES.WM_OBJECTS} (
       Guid,
       Mac,
       Name,
@@ -28,7 +36,7 @@ const queries = {
 
   SQL_INS_WM_RECORD: `
   INSERT INTO
-    WmRecords (
+    ${common.DB_TABLES.WM_RECORDS} (
       Data,
       WmObjectId
     )
@@ -40,7 +48,7 @@ const queries = {
 
   SQL_UPD_WM_OBJECT_IS_ACTIVATED_BY_ID: `
   UPDATE 
-    WmObjects
+    ${common.DB_TABLES.WM_OBJECTS}
   SET
     IsActivated = @IsActivated
   WHERE

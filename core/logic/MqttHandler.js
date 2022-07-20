@@ -30,38 +30,38 @@ class MqttHandler {
    */
   static #instance;
 
-  /**
-   * URL.
-   *
-   * @type {string}
-   */
-  #url = process.env.CLOUDMQTT_URL || 'mqtt://localhost:1883';
-
-  /**
-   * MQTT client.
-   *
-   * @type {mqtt.Client}
-   */
-  #client = mqtt.connect(this.#url);
-
   // /**
-  //  * MQTT server URL.
+  //  * URL.
   //  *
   //  * @type {string}
   //  */
-  // #url = 'mqtt://driver.cloudmqtt.com';
+  // #url = process.env.CLOUDMQTT_URL || 'mqtt://localhost:1883';
 
   // /**
   //  * MQTT client.
   //  *
   //  * @type {mqtt.Client}
   //  */
-  // #client = mqtt.connect(this.#url, {
-  //   clean: true,
-  //   port: 18850,
-  //   username: 'oxiztsaz',
-  //   password: 'fYBafc9Fy6pZ',
-  // });
+  // #client = mqtt.connect(this.#url);
+
+  /**
+   * MQTT server URL.
+   *
+   * @type {string}
+   */
+  #url = 'mqtt://driver.cloudmqtt.com';
+
+  /**
+   * MQTT client.
+   *
+   * @type {mqtt.Client}
+   */
+  #client = mqtt.connect(this.#url, {
+    clean: true,
+    port: 18850,
+    username: 'oxiztsaz',
+    password: 'fYBafc9Fy6pZ',
+  });
 
   /**
    * Object registration request.
@@ -176,7 +176,12 @@ class MqttHandler {
    */
   connect() {
     this.#client.on('connect', async () => {
-      console.log('Connected to the "' + this.#url + '" MQTT broker.');
+      console.log(
+        LogHandler.getInstance().getLogMessage(
+          common.LOG_MSG_TYPES.MQTT_CONNECTED,
+          this.#url
+        )
+      );
 
       this.#client.subscribe(common.MQTT_TOPICS.slice(0, 6), async () => {
         this.#client.on('message', async (topic, msg) => {

@@ -11,7 +11,6 @@ const LogHandler = require('./LogHandler');
 const queries = require('../data/queries');
 const typedefs = require('../data/typedefs');
 const common = require('../data/common');
-const PackageParser = require('./PackageParser');
 
 //#endregion
 
@@ -165,7 +164,7 @@ class DbHandler {
         req.on('requestCompleted', async () => {
           console.log(
             LogHandler.getInstance().getLogMessage(
-              common.LOG_MSG_TYPES.DB_ROW_INSERTED,
+              common.LOG_MSG_TYPES.DB_ROW_UPDATED,
               common.DB_TABLES.WM_RECORDS,
               args[1]
             )

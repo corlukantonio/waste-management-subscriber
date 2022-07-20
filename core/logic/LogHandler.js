@@ -73,6 +73,7 @@ class LogHandler {
         break;
 
       case common.LOG_MSG_TYPES.MQTT_CONNECTED:
+        logMessage += 'Connected to the "' + args[0] + '" MQTT broker.';
         break;
 
       case common.LOG_MSG_TYPES.ERR_PKG_LEN:
