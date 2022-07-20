@@ -9,13 +9,13 @@ const { Request } = require('tedious');
 
 // Core - Logic
 const DbHandler = require('./DbHandler');
+const LogHandler = require('./LogHandler');
 const PackageParser = require('./PackageParser');
 
 // Core - Data
 const common = require('../data/common');
 const queries = require('../data/queries');
 const typedefs = require('../data/typedefs');
-const { MQTT_TOPICS } = require('../data/common');
 
 //#endregion
 
@@ -30,38 +30,38 @@ class MqttHandler {
    */
   static #instance;
 
-  // /**
-  //  * URL.
-  //  *
-  //  * @type {string}
-  //  */
-  // #url = process.env.CLOUDMQTT_URL || 'mqtt://localhost:1883';
-
-  // /**
-  //  * MQTT client.
-  //  *
-  //  * @type {mqtt.Client}
-  //  */
-  // #client = mqtt.connect(this.#url);
-
   /**
-   * MQTT server URL.
+   * URL.
    *
    * @type {string}
    */
-  #url = 'mqtt://driver.cloudmqtt.com';
+  #url = process.env.CLOUDMQTT_URL || 'mqtt://localhost:1883';
 
   /**
    * MQTT client.
    *
    * @type {mqtt.Client}
    */
-  #client = mqtt.connect(this.#url, {
-    clean: true,
-    port: 18850,
-    username: 'oxiztsaz',
-    password: 'fYBafc9Fy6pZ',
-  });
+  #client = mqtt.connect(this.#url);
+
+  // /**
+  //  * MQTT server URL.
+  //  *
+  //  * @type {string}
+  //  */
+  // #url = 'mqtt://driver.cloudmqtt.com';
+
+  // /**
+  //  * MQTT client.
+  //  *
+  //  * @type {mqtt.Client}
+  //  */
+  // #client = mqtt.connect(this.#url, {
+  //   clean: true,
+  //   port: 18850,
+  //   username: 'oxiztsaz',
+  //   password: 'fYBafc9Fy6pZ',
+  // });
 
   /**
    * Object registration request.
@@ -188,6 +188,11 @@ class MqttHandler {
                     if (
                       msg.byteLength === common.PKG_LENGTHS.V1.OBJ_REG_REQ_PKG
                     ) {
+                      /**
+                       * Select.
+                       *
+                       * @type {Request}
+                       */
                       let sqlSelWmObjects = new Request(
                         queries.SQL_SEL_WM_OBJECTS,
                         async (err) => {
@@ -195,6 +200,11 @@ class MqttHandler {
                         }
                       );
 
+                      /**
+                       * Insert.
+                       *
+                       * @type {Request}
+                       */
                       let sqlInsWmObject = new Request(
                         queries.SQL_INS_WM_OBJECT,
                         async (err) => {
@@ -209,6 +219,21 @@ class MqttHandler {
                           PackageParser.getInstance().objectRegistrationRequestV1(
                             msg
                           );
+
+                        if (
+                          !PackageParser.getInstance().checkCrc(
+                            this.#objectRegistrationRequest,
+                            msg
+                          )
+                        ) {
+                          console.log(
+                            LogHandler.getInstance().getLogMessage(
+                              common.LOG_MSG_TYPES.ERR_PKG_CRC
+                            )
+                          );
+
+                          return;
+                        }
 
                         for (
                           let i = 0;
@@ -235,6 +260,12 @@ class MqttHandler {
                             uuid.v4().toString(),
                             this.getGeneratedActivationCode()
                           );
+                        } else {
+                          console.log(
+                            LogHandler.getInstance().getLogMessage(
+                              common.LOG_MSG_TYPES.OBJ_DUPLICATE
+                            )
+                          );
                         }
                       });
 
@@ -244,21 +275,21 @@ class MqttHandler {
                       );
                     } else {
                       console.log(
-                        'Package length error! Expected ' +
-                          common.PKG_LENGTHS.V1.OBJ_REG_REQ_PKG +
-                          ', got ' +
-                          msg.byteLength +
-                          '.'
+                        LogHandler.getInstance().getLogMessage(
+                          common.LOG_MSG_TYPES.ERR_PKG_LEN,
+                          common.PKG_LENGTHS.V1.OBJ_REG_REQ_PKG,
+                          msg.byteLength
+                        )
                       );
                     }
                   }
                 } else {
                   console.log(
-                    'Package type error! Expected ' +
-                      common.PKG_TYPES.OBJ_REG_REQ_PKG +
-                      ', got ' +
-                      msg[0] +
-                      '.'
+                    LogHandler.getInstance().getLogMessage(
+                      common.LOG_MSG_TYPES.ERR_PKG_TYPE,
+                      common.PKG_TYPES.OBJ_REG_REQ_PKG,
+                      msg[0]
+                    )
                   );
                 }
 
@@ -270,6 +301,11 @@ class MqttHandler {
                     if (
                       msg.byteLength === common.PKG_LENGTHS.V1.OBJ_ACT_REQ_PKG
                     ) {
+                      /**
+                       * Select.
+                       *
+                       * @type {Request}
+                       */
                       let sqlSelWmObjects = new Request(
                         queries.SQL_SEL_WM_OBJECTS,
                         async (err) => {
@@ -277,6 +313,11 @@ class MqttHandler {
                         }
                       );
 
+                      /**
+                       * Update.
+                       *
+                       * @type {Request}
+                       */
                       let sqlUpdWmObjectIsActivatedById = new Request(
                         queries.SQL_UPD_WM_OBJECT_IS_ACTIVATED_BY_ID,
                         async (err) => {
@@ -289,6 +330,21 @@ class MqttHandler {
                           PackageParser.getInstance().getObjectActivationRequestV1(
                             msg
                           );
+
+                        if (
+                          !PackageParser.getInstance().checkCrc(
+                            this.#objectActivationRequest,
+                            msg
+                          )
+                        ) {
+                          console.log(
+                            LogHandler.getInstance().getLogMessage(
+                              common.LOG_MSG_TYPES.ERR_PKG_CRC
+                            )
+                          );
+
+                          return;
+                        }
 
                         for (
                           let i = 0;
@@ -327,21 +383,21 @@ class MqttHandler {
                       );
                     } else {
                       console.log(
-                        'Package length error! Expected ' +
-                          common.PKG_LENGTHS.V1.OBJ_ACT_REQ_PKG +
-                          ', got ' +
-                          msg.byteLength +
-                          '.'
+                        LogHandler.getInstance().getLogMessage(
+                          common.LOG_MSG_TYPES.ERR_PKG_LEN,
+                          common.PKG_LENGTHS.V1.OBJ_ACT_REQ_PKG,
+                          msg.byteLength
+                        )
                       );
                     }
                   }
                 } else {
                   console.log(
-                    'Package type error! Expected ' +
-                      common.PKG_TYPES.OBJ_ACT_REQ_PKG +
-                      ', got ' +
-                      msg[0] +
-                      '.'
+                    LogHandler.getInstance().getLogMessage(
+                      common.LOG_MSG_TYPES.ERR_PKG_TYPE,
+                      common.PKG_TYPES.OBJ_ACT_REQ_PKG,
+                      msg[0]
+                    )
                   );
                 }
 
@@ -373,6 +429,11 @@ class MqttHandler {
                           msg
                         )
                     ) {
+                      /**
+                       * Select.
+                       *
+                       * @type {Request}
+                       */
                       let sqlSelWmObjects = new Request(
                         queries.SQL_SEL_WM_OBJECTS,
                         async (err) => {
@@ -380,6 +441,11 @@ class MqttHandler {
                         }
                       );
 
+                      /**
+                       * Insert.
+                       *
+                       * @type {Request}
+                       */
                       let sqlInsWmRecord = new Request(
                         queries.SQL_INS_WM_RECORD,
                         async (err) => {
@@ -390,6 +456,21 @@ class MqttHandler {
                       sqlSelWmObjects.on('requestCompleted', async () => {
                         this.#objectRecord =
                           PackageParser.getInstance().getObjectRecordV1(msg);
+
+                        if (
+                          !PackageParser.getInstance().checkCrc(
+                            this.#objectRecord,
+                            msg
+                          )
+                        ) {
+                          console.log(
+                            LogHandler.getInstance().getLogMessage(
+                              common.LOG_MSG_TYPES.ERR_PKG_CRC
+                            )
+                          );
+
+                          return;
+                        }
 
                         for (
                           let i = 0;
@@ -413,11 +494,11 @@ class MqttHandler {
                               );
 
                               /**
-                               * Time.
+                               * Set time command.
                                *
                                * @type {string}
                                */
-                              let time = '';
+                              let stCmd = '';
 
                               /**
                                * Date.
@@ -426,22 +507,25 @@ class MqttHandler {
                                */
                               let date = new Date(Date.now());
 
-                              time += 'st ';
-                              time += date.getUTCFullYear() + ' ';
-                              time += date.getUTCMonth() + 1 + ' ';
-                              time += date.getUTCDate() + ' ';
-                              time += date.getUTCHours() + ' ';
-                              time += date.getUTCMinutes() + ' ';
-                              time += date.getUTCSeconds();
+                              stCmd += 'st ';
+                              stCmd += date.getUTCFullYear() + ' ';
+                              stCmd += date.getUTCMonth() + 1 + ' ';
+                              stCmd += date.getUTCDate() + ' ';
+                              stCmd += date.getUTCHours() + ' ';
+                              stCmd += date.getUTCMinutes() + ' ';
+                              stCmd += date.getUTCSeconds();
 
-                              console.log(time);
-
-                              // this.#client.publish(MQTT_TOPICS[6], )
+                              this.#client.publish(
+                                common.MQTT_TOPICS[6] +
+                                  this.#objectRecord.mac.toString('hex'),
+                                stCmd
+                              );
                             } else {
                               console.log(
-                                'WmObject with Id value ' +
-                                  DbHandler.getInstance().getWmObjects()[i].Id +
-                                  ' is not activated.'
+                                LogHandler.getInstance().getLogMessage(
+                                  common.LOG_MSG_TYPES.OBJ_NOT_ACT,
+                                  DbHandler.getInstance().getWmObjects()[i].Id
+                                )
                               );
                             }
 
@@ -456,24 +540,24 @@ class MqttHandler {
                       );
                     } else {
                       console.log(
-                        'Package length error! Expected ' +
-                          (common.PKG_LENGTHS.V1.OBJ_REC_BASE_PKG +
+                        LogHandler.getInstance().getLogMessage(
+                          common.LOG_MSG_TYPES.ERR_PKG_LEN,
+                          common.PKG_LENGTHS.V1.OBJ_REC_BASE_PKG +
                             PackageParser.getInstance().getObjectRecordV1ValuesLength(
                               msg
-                            )) +
-                          ', got ' +
-                          msg.byteLength +
-                          '.'
+                            ),
+                          msg.byteLength
+                        )
                       );
                     }
                   }
                 } else {
                   console.log(
-                    'Package type error! Expected ' +
-                      common.PKG_TYPES.OBJ_REC_BASE_PKG +
-                      ', got ' +
-                      msg[0] +
-                      '.'
+                    LogHandler.getInstance().getLogMessage(
+                      common.LOG_MSG_TYPES.ERR_PKG_TYPE,
+                      common.PKG_TYPES.OBJ_REC_BASE_PKG,
+                      msg[0]
+                    )
                   );
                 }
 

@@ -67,7 +67,7 @@ router.get('/stream', async (req, res) => {
     .getClient()
     .on('message', async (topic, msg, pkt) => {
       if (topic == common.MQTT_TOPICS[5]) {
-        let json = JSON.parse(msg);
+        let json = JSON.parse(msg.toString());
         res.write('data: ' + json.date + ': ' + json.msg + '\n\n');
       }
     });

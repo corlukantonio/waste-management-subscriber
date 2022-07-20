@@ -4,9 +4,14 @@
 
 const { Connection, TYPES, Request } = require('tedious');
 
+// Core - Logic
+const LogHandler = require('./LogHandler');
+
 // Core - Data
 const queries = require('../data/queries');
 const typedefs = require('../data/typedefs');
+const common = require('../data/common');
+const PackageParser = require('./PackageParser');
 
 //#endregion
 
@@ -119,7 +124,11 @@ class DbHandler {
               console.log('NULL');
             } else {
               console.log(
-                'Inserted a new WmObject with Id value: ' + column.value
+                LogHandler.getInstance().getLogMessage(
+                  common.LOG_MSG_TYPES.DB_ROW_INSERTED,
+                  common.DB_TABLES.WM_OBJECTS,
+                  column.value
+                )
               );
             }
           });
@@ -137,7 +146,11 @@ class DbHandler {
               console.log('NULL');
             } else {
               console.log(
-                'Inserted a new WmRecord with Id value: ' + column.value
+                LogHandler.getInstance().getLogMessage(
+                  common.LOG_MSG_TYPES.DB_ROW_INSERTED,
+                  common.DB_TABLES.WM_RECORDS,
+                  column.value
+                )
               );
             }
           });
@@ -150,7 +163,13 @@ class DbHandler {
         req.addParameter('Id', TYPES.Int, args[1]);
 
         req.on('requestCompleted', async () => {
-          console.log('Updated WmObject with Id value: ' + args[1]);
+          console.log(
+            LogHandler.getInstance().getLogMessage(
+              common.LOG_MSG_TYPES.DB_ROW_INSERTED,
+              common.DB_TABLES.WM_RECORDS,
+              args[1]
+            )
+          );
         });
 
         break;
@@ -172,7 +191,10 @@ class DbHandler {
       if (err) console.log(err.message);
 
       console.log(
-        'Connected to the "' + this.#config.options.database + '" SQL database.'
+        LogHandler.getInstance().getLogMessage(
+          common.LOG_MSG_TYPES.DB_CONNECTED,
+          this.#config.options.database
+        )
       );
     });
 

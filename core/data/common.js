@@ -13,6 +13,23 @@ const typedefs = require('./typedefs');
  * @type {typedefs.Common}
  */
 const common = {
+  DB_TABLES: {
+    WM_OBJECTS: 'WmObjects',
+    WM_RECORDS: 'WmRecords',
+  },
+
+  LOG_MSG_TYPES: {
+    DB_CONNECTED: 0x01,
+    DB_ROW_INSERTED: 0x02,
+    DB_ROW_UPDATED: 0x03,
+    MQTT_CONNECTED: 0x04,
+    ERR_PKG_LEN: 0x05,
+    ERR_PKG_TYPE: 0x06,
+    ERR_PKG_CRC: 0x07,
+    OBJ_DUPLICATE: 0x08,
+    OBJ_NOT_ACT: 0x09,
+  },
+
   MQTT_TOPICS: [
     'iot/wm/devreg',
     'iot/wm/devact',

@@ -20,6 +20,13 @@ class PackageParser {
   static #instance;
 
   /**
+   * Counter.
+   *
+   * @type {number}
+   */
+  #i = 0;
+
+  /**
    * @private
    */
   constructor() {}
@@ -35,6 +42,127 @@ class PackageParser {
     }
 
     return PackageParser.#instance;
+  }
+
+  /**
+   * Get MAC.
+   *
+   * @param {Buffer} buff Buffer.
+   * @return {Buffer} MAC.
+   */
+  getMac(buff) {
+    /**
+     * MAC.
+     *
+     * @type {Buffer}
+     */
+    let mac = Buffer.from([
+      buff[this.#i++],
+      buff[this.#i++],
+      buff[this.#i++],
+      buff[this.#i++],
+      buff[this.#i++],
+      buff[this.#i++],
+    ]);
+
+    return mac;
+  }
+
+  /**
+   * Get RTC.
+   *
+   * @param {Buffer} buff Buffer.
+   * @return {Array.<Number>} RTC.
+   */
+  getRtc(buff) {
+    /**
+     * RTC.
+     *
+     * @type {Array.<Number>}
+     */
+    let rtc = [
+      buff[this.#i++],
+      buff[this.#i++],
+      buff[this.#i++],
+      buff[this.#i++],
+      buff[this.#i++],
+      buff[this.#i++],
+    ];
+
+    return rtc;
+  }
+
+  /**
+   * Get 8 bytes buffer.
+   *
+   * @param {Buffer} buff Buffer.
+   * @return {Buffer} Buffer.
+   */
+  get8BytesBuffer(buff) {
+    /**
+     * Buffer.
+     *
+     * @type {Buffer}
+     */
+    let val = Buffer.from([
+      buff[this.#i++],
+      buff[this.#i++],
+      buff[this.#i++],
+      buff[this.#i++],
+      buff[this.#i++],
+      buff[this.#i++],
+      buff[this.#i++],
+      buff[this.#i++],
+    ]);
+
+    return val;
+  }
+
+  /**
+   * Get CRC.
+   *
+   * @param {Buffer} buff Buffer.
+   * @return {number} CRC.
+   */
+  getCrc(buff) {
+    /**
+     * CRC.
+     *
+     * @type {number}
+     */
+    let crc = 0x00;
+
+    for (let j = 0; j < buff.byteLength; j++) {
+      crc += j * buff[j];
+
+      while (crc >= 256) {
+        crc -= 256;
+      }
+    }
+
+    return crc;
+  }
+
+  /**
+   * Check CRC.
+   *
+   * @param {typedefs.ObjectRegistrationRequest | typedefs.ObjectActivationRequest | typedefs.ObjectRecord} pkg Package.
+   * @param {Buffer} buff Buffer.
+   * @return {boolean} Check.
+   */
+  checkCrc(pkg, buff) {
+    /**
+     * Check.
+     *
+     * @type {boolean}
+     */
+    let isEqual = false;
+
+    if (pkg.crc === this.getCrc(buff.slice(0, -1))) {
+      isEqual = true;
+    }
+
+    return isEqual;
   }
 
   /**
@@ -57,33 +185,14 @@ class PackageParser {
       crc: 0x00,
     };
 
-    /**
-     * Counter.
-     *
-     * @type {number}
-     */
-    let i = 0;
+    this.#i = 0;
 
-    if (buff.byteLength > 0) {
-      parsedPackage.packageType = buff[i++];
-      parsedPackage.packageVersion = buff[i++];
-      parsedPackage.mac = Buffer.from([
-        buff[i++],
-        buff[i++],
-        buff[i++],
-        buff[i++],
-        buff[i++],
-        buff[i++],
-      ]);
-      parsedPackage.rtc = [
-        buff[i++],
-        buff[i++],
-        buff[i++],
-        buff[i++],
-        buff[i++],
-        buff[i++],
-      ];
-      parsedPackage.crc = buff[i];
+    if (buff.byteLength === common.PKG_LENGTHS.V1.OBJ_REG_REQ_PKG) {
+      parsedPackage.packageType = buff[this.#i++];
+      parsedPackage.packageVersion = buff[this.#i++];
+      parsedPackage.mac = this.getMac(buff);
+      parsedPackage.rtc = this.getRtc(buff);
+      parsedPackage.crc = buff[this.#i];
     }
 
     return parsedPackage;
@@ -110,152 +219,20 @@ class PackageParser {
       crc: 0x00,
     };
 
-    /**
-     * Counter.
-     *
-     * @type {number}
-     */
-    let i = 0;
+    this.#i = 0;
 
-    if (buff.byteLength > 0) {
-      parsedPackage.packageType = buff[i++];
-      parsedPackage.packageVersion = buff[i++];
-      parsedPackage.mac = Buffer.from([
-        buff[i++],
-        buff[i++],
-        buff[i++],
-        buff[i++],
-        buff[i++],
-        buff[i++],
-      ]);
-      parsedPackage.rtc = [
-        buff[i++],
-        buff[i++],
-        buff[i++],
-        buff[i++],
-        buff[i++],
-        buff[i++],
-      ];
+    if (buff.byteLength === common.PKG_LENGTHS.V1.OBJ_ACT_REQ_PKG) {
+      parsedPackage.packageType = buff[this.#i++];
+      parsedPackage.packageVersion = buff[this.#i++];
+      parsedPackage.mac = this.getMac(buff);
+      parsedPackage.rtc = this.getRtc(buff);
       parsedPackage.activationCode = Buffer.from([
-        buff[i++],
-        buff[i++],
-        buff[i++],
-        buff[i++],
+        buff[this.#i++],
+        buff[this.#i++],
+        buff[this.#i++],
+        buff[this.#i++],
       ]);
-      parsedPackage.crc = buff[i];
-    }
-
-    return parsedPackage;
-  }
-
-  /**
-   * Get object record (v1).
-   *
-   * @param {Buffer} buff Buffer.
-   * @return {typedefs.ObjectRecord} Object record.
-   */
-  getObjectRecordV1(buff) {
-    /**
-     * Parsed package.
-     *
-     * @type {typedefs.ObjectRecord}
-     */
-    let parsedPackage = {
-      packageType: 0x00,
-      packageVersion: 0x00,
-      mac: Buffer.from([0x00, 0x00, 0x00, 0x00, 0x00, 0x00]),
-      rtc: [0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
-      numberOfValues: 0,
-      values: {},
-      rssi: 0,
-      crc: 0x00,
-    };
-
-    /**
-     * Counter.
-     *
-     * @type {number}
-     */
-    let i = 0;
-
-    if (buff.byteLength > 0) {
-      parsedPackage.packageType = buff[i++];
-      parsedPackage.packageVersion = buff[i++];
-      parsedPackage.mac = Buffer.from([
-        buff[i++],
-        buff[i++],
-        buff[i++],
-        buff[i++],
-        buff[i++],
-        buff[i++],
-      ]);
-      parsedPackage.rtc = [
-        buff[i++],
-        buff[i++],
-        buff[i++],
-        buff[i++],
-        buff[i++],
-        buff[i++],
-      ];
-      parsedPackage.numberOfValues = buff[i++];
-
-      for (let j = 0; j < parsedPackage.numberOfValues; j++) {
-        switch (buff[i]) {
-          case common.VAL_TYPES.DISTANCE:
-            i++;
-
-            parsedPackage.values.distance = Buffer.from([
-              buff[i++],
-              buff[i++],
-              buff[i++],
-              buff[i++],
-              buff[i++],
-              buff[i++],
-              buff[i++],
-              buff[i++],
-            ]).readDoubleLE(0);
-
-            break;
-
-          case common.VAL_TYPES.HUMIDITY:
-            i++;
-
-            parsedPackage.values.humidity = Buffer.from([
-              buff[i++],
-              buff[i++],
-              buff[i++],
-              buff[i++],
-              buff[i++],
-              buff[i++],
-              buff[i++],
-              buff[i++],
-            ]).readDoubleLE(0);
-
-            break;
-
-          case common.VAL_TYPES.TEMPERATURE_CELSIUS:
-            i++;
-
-            parsedPackage.values.temperatureCelsius = Buffer.from([
-              buff[i++],
-              buff[i++],
-              buff[i++],
-              buff[i++],
-              buff[i++],
-              buff[i++],
-              buff[i++],
-              buff[i++],
-            ]).readDoubleLE(0);
-
-            break;
-
-          default:
-            break;
-        }
-      }
-
-      parsedPackage.rssi = Buffer.from([buff[i++], buff[i++]]).readInt16LE(0);
-      parsedPackage.crc = buff[i];
+      parsedPackage.crc = buff[this.#i];
     }
 
     return parsedPackage;
@@ -315,6 +292,79 @@ class PackageParser {
     }
 
     return length;
+  }
+
+  /**
+   * Get object record (v1).
+   *
+   * @param {Buffer} buff Buffer.
+   * @return {typedefs.ObjectRecord} Object record.
+   */
+  getObjectRecordV1(buff) {
+    /**
+     * Parsed package.
+     *
+     * @type {typedefs.ObjectRecord}
+     */
+    let parsedPackage = {
+      packageType: 0x00,
+      packageVersion: 0x00,
+      mac: Buffer.from([0x00, 0x00, 0x00, 0x00, 0x00, 0x00]),
+      rtc: [0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
+      numberOfValues: 0,
+      values: {},
+      rssi: 0,
+      crc: 0x00,
+    };
+
+    this.#i = 0;
+
+    if (buff.byteLength > 0) {
+      parsedPackage.packageType = buff[this.#i++];
+      parsedPackage.packageVersion = buff[this.#i++];
+      parsedPackage.mac = this.getMac(buff);
+      parsedPackage.rtc = this.getRtc(buff);
+      parsedPackage.numberOfValues = buff[this.#i++];
+
+      for (let j = 0; j < parsedPackage.numberOfValues; j++) {
+        switch (buff[this.#i]) {
+          case common.VAL_TYPES.DISTANCE:
+            this.#i++;
+
+            parsedPackage.values.distance =
+              this.get8BytesBuffer(buff).readDoubleLE(0);
+
+            break;
+
+          case common.VAL_TYPES.HUMIDITY:
+            this.#i++;
+
+            parsedPackage.values.humidity =
+              this.get8BytesBuffer(buff).readDoubleLE(0);
+
+            break;
+
+          case common.VAL_TYPES.TEMPERATURE_CELSIUS:
+            this.#i++;
+
+            parsedPackage.values.temperatureCelsius =
+              this.get8BytesBuffer(buff).readDoubleLE(0);
+
+            break;
+
+          default:
+            break;
+        }
+      }
+
+      parsedPackage.rssi = Buffer.from([
+        buff[this.#i++],
+        buff[this.#i++],
+      ]).readInt16LE(0);
+      parsedPackage.crc = buff[this.#i];
+    }
+
+    return parsedPackage;
   }
 }
 

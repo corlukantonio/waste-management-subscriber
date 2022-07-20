@@ -1,6 +1,27 @@
 // @ts-check
 
 /**
+ * @typedef DbTables
+ * @type {object}
+ * @prop {string} WM_OBJECTS - WmObjects.
+ * @prop {string} WM_RECORDS - WmRecords.
+ */
+
+/**
+ * @typedef LogMessageTypes
+ * @type {object}
+ * @prop {number} DB_CONNECTED - Database connected.
+ * @prop {number} DB_ROW_INSERTED - Database row inserted.
+ * @prop {number} DB_ROW_UPDATED - Database row updated.
+ * @prop {number} MQTT_CONNECTED - MQTT connected.
+ * @prop {number} ERR_PKG_LEN - Error package length.
+ * @prop {number} ERR_PKG_TYPE - Error package type.
+ * @prop {number} ERR_PKG_CRC - Error package CRC.
+ * @prop {number} OBJ_DUPLICATE - Object duplicate.
+ * @prop {number} OBJ_NOT_ACT - Object not activated.
+ */
+
+/**
  * @typedef PackageTypes
  * @type {object}
  * @prop {number} OBJ_REG_REQ_PKG - ObjectRegistrationRequestPackage.
@@ -38,6 +59,8 @@
 /**
  * @typedef Common
  * @type {object}
+ * @prop {DbTables} DB_TABLES - Database tables.
+ * @prop {LogMessageTypes} LOG_MSG_TYPES - Log message types.
  * @prop {Array.<String>} MQTT_TOPICS - MQTT topics.
  * @prop {PackageTypes} PKG_TYPES - Package types.
  * @prop {PackageLengths} PKG_LENGTHS - Package lengths.

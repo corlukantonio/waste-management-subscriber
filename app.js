@@ -33,7 +33,7 @@ app.use('/', require('./routes/index'));
  * Catch 404 and forward to error handler.
  */
 
-app.use(function (req, res, next) {
+app.use(async (req, res, next) => {
   let err = new Error('Not Found');
   err.status = 404;
   next(err);
@@ -43,7 +43,7 @@ app.use(function (req, res, next) {
  * Error handler.
  */
 
-app.use(function (err, req, res, next) {
+app.use(async (err, req, res, next) => {
   /**
    * Set locals, only providing error in development.
    */
@@ -66,6 +66,12 @@ process.on('SIGINT', async () => {
   console.log('Goodbye!');
 
   process.exit(1);
+});
+
+process.on('SIGTERM', async () => {
+  DbHandler.getInstance().closeConn();
+
+  console.log('Goodbye!');
 });
 
 module.exports = app;
