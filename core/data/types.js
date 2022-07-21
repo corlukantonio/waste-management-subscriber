@@ -137,15 +137,4 @@
  * @prop {number} crc - CRC.
  */
 
-/**
- * @typedef Types
- * @type {object}
- * @prop {Common} Common - Common.
- * @prop {DbConfig} DbConfig - Database config.
- * @prop {WmObject} WmObject - Object.
- * @prop {ObjectRegistrationRequest} ObjectRegistrationRequest - Object registration request.
- * @prop {ObjectActivationRequest} ObjectActivationRequest - Object activation request.
- * @prop {ObjectRecord} ObjectRecord - Object record.
- */
-
-export default Types;
+module.exports = null;

@@ -3,14 +3,14 @@
 //#region Imports
 
 // Core - Data
-import Types from './types';
+const types = require('./types');
 
 //#endregion
 
 /**
  * Common.
  *
- * @type {Types["Common"]}
+ * @type {types.Common}
  */
 const common = {
   DB_TABLES: {
@@ -74,4 +74,4 @@ const common = {
   },
 };
 
-export default common;
+module.exports = common;

@@ -3,7 +3,7 @@
 //#region Imports
 
 // Core - Data
-import common from '../data/common';
+const common = require('../data/common');
 
 //#endregion
 
@@ -126,4 +126,4 @@ class LogHandler {
   }
 }
 
-export default LogHandler;
+module.exports = LogHandler;

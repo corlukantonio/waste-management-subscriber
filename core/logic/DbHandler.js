@@ -2,15 +2,15 @@
 
 //#region Imports
 
-import { Connection, TYPES, Request } from 'tedious';
+const { Connection, Request, TYPES } = require('tedious');
 
 // Core - Logic
-import LogHandler from './LogHandler';
+const LogHandler = require('./LogHandler');
 
 // Core - Data
-import queries from '../data/queries';
-import Types from '../data/types';
-import common from '../data/common';
+const common = require('../data/common');
+const queries = require('../data/queries');
+const types = require('../data/types');
 
 //#endregion
 
@@ -28,7 +28,7 @@ class DbHandler {
   /**
    * Database config data.
    *
-   * @type {Types["DbConfig"]}
+   * @type {types.DbConfig}
    */
   #config = {
     server: 'waste-management.database.windows.net',
@@ -55,7 +55,7 @@ class DbHandler {
   /**
    * WmObjects.
    *
-   * @type {Array.<Types["WmObject"]>}
+   * @type {Array.<types.WmObject>}
    */
   #wmObjects = [];
 
@@ -66,7 +66,7 @@ class DbHandler {
     /**
      * Get WmObjects.
      *
-     * @return {Array.<Types["WmObject"]>} WmObjects.
+     * @return {Array.<types.WmObject>} WmObjects.
      */
     this.getWmObjects = () => this.#wmObjects;
   }
@@ -219,4 +219,4 @@ class DbHandler {
   }
 }
 
-export default DbHandler;
+module.exports = DbHandler;

@@ -2,26 +2,25 @@
 
 //#region Imports
 
-import { Client, connect as _connect } from 'mqtt';
-import { v4 } from 'uuid';
-
-import { Request } from 'tedious';
+const mqtt = require('mqtt');
+const { Request } = require('tedious');
+const uuid = require('uuid');
 
 // Core - Logic
-import DbHandler from './DbHandler';
-import LogHandler from './LogHandler';
-import PackageParser from './PackageParser';
+const DbHandler = require('../logic/DbHandler');
+const LogHandler = require('../logic/LogHandler');
+const PackageParser = require('../logic/PackageParser');
 
 // Core - Logic - Package validator
-import PackageCrcValidator from './package_validator/PackageCrcValidator';
-import PackageLengthValidator from './package_validator/PackageLengthValidator';
-import PackageTypeValidator from './package_validator/PackageTypeValidator';
-import PackageVersionValidator from './package_validator/PackageVersionValidator';
+const PackageCrcValidator = require('./package_validator/PackageCrcValidator');
+const PackageLengthValidator = require('./package_validator/PackageLengthValidator');
+const PackageTypeValidator = require('./package_validator/PackageTypeValidator');
+const PackageVersionValidator = require('./package_validator/PackageVersionValidator');
 
 // Core - Data
-import common from '../data/common';
-import queries from '../data/queries';
-import Types from '../data/types';
+const common = require('../data/common');
+const queries = require('../data/queries');
+const types = require('../data/types');
 
 //#endregion
 
@@ -36,43 +35,43 @@ class MqttHandler {
    */
   static #instance;
 
-  /**
-   * URL.
-   *
-   * @type {string}
-   */
-  #url = process.env.CLOUDMQTT_URL || 'mqtt://localhost:1883';
-
-  /**
-   * MQTT client.
-   *
-   * @type {Client}
-   */
-  #client = _connect(this.#url);
-
   // /**
-  //  * MQTT server URL.
+  //  * URL.
   //  *
   //  * @type {string}
   //  */
-  // #url = 'mqtt://driver.cloudmqtt.com';
+  // #url = process.env.CLOUDMQTT_URL || 'mqtt://localhost:1883';
 
   // /**
   //  * MQTT client.
   //  *
-  //  * @type {Client}
+  //  * @type {mqtt.Client}
   //  */
-  // #client = _connect(this.#url, {
-  //   clean: true,
-  //   port: 18850,
-  //   username: 'oxiztsaz',
-  //   password: 'fYBafc9Fy6pZ',
-  // });
+  // #client = mqtt.connect(this.#url);
+
+  /**
+   * MQTT server URL.
+   *
+   * @type {string}
+   */
+  #url = 'mqtt://driver.cloudmqtt.com';
+
+  /**
+   * MQTT client.
+   *
+   * @type {mqtt.Client}
+   */
+  #client = mqtt.connect(this.#url, {
+    clean: true,
+    port: 18850,
+    username: 'oxiztsaz',
+    password: 'fYBafc9Fy6pZ',
+  });
 
   /**
    * Object registration request.
    *
-   * @type {Types["ObjectRegistrationRequest"]}
+   * @type {types.ObjectRegistrationRequest}
    */
   #objectRegistrationRequest = {
     packageType: 0x00,
@@ -85,7 +84,7 @@ class MqttHandler {
   /**
    * Object activation request.
    *
-   * @type {Types["ObjectActivationRequest"]}
+   * @type {types.ObjectActivationRequest}
    */
   #objectActivationRequest = {
     packageType: 0x00,
@@ -99,7 +98,7 @@ class MqttHandler {
   /**
    * Object record.
    *
-   * @type {Types["ObjectRecord"]}
+   * @type {types.ObjectRecord}
    */
   #objectRecord = {
     packageType: 0x00,
@@ -154,7 +153,7 @@ class MqttHandler {
     /**
      * Get MQTT client.
      *
-     * @return {Client} MQTT client.
+     * @return {mqtt.Client} MQTT client.
      */
     this.getClient = () => this.#client;
 
@@ -262,7 +261,7 @@ class MqttHandler {
                   common.PKG_TYPES.OBJ_REG_REQ_PKG
                 );
 
-                this.#pkgVersionValidator.setPkgVersion(0x01);
+                this.#pkgVersionValidator.setPkgVersion(common.PKG_VERSIONS.V1);
 
                 this.#pkgLengthValidator.setPkgLength(
                   common.PKG_LENGTHS.V1.OBJ_REG_REQ_PKG
@@ -321,9 +320,9 @@ class MqttHandler {
                       DbHandler.getInstance().execSql(
                         queries.SQL_INS_WM_OBJECT,
                         sqlInsWmObject,
-                        Buffer.from(v4()),
+                        Buffer.from(uuid.v4()),
                         this.#objectRegistrationRequest.mac,
-                        v4().toString(),
+                        uuid.v4().toString(),
                         this.getGeneratedActivationCode()
                       );
                     } else {
@@ -348,7 +347,7 @@ class MqttHandler {
                   common.PKG_TYPES.OBJ_ACT_REQ_PKG
                 );
 
-                this.#pkgVersionValidator.setPkgVersion(0x01);
+                this.#pkgVersionValidator.setPkgVersion(common.PKG_VERSIONS.V1);
 
                 this.#pkgLengthValidator.setPkgLength(
                   common.PKG_LENGTHS.V1.OBJ_ACT_REQ_PKG
@@ -445,7 +444,7 @@ class MqttHandler {
                   common.PKG_TYPES.OBJ_REC_BASE_PKG
                 );
 
-                this.#pkgVersionValidator.setPkgVersion(0x01);
+                this.#pkgVersionValidator.setPkgVersion(common.PKG_VERSIONS.V1);
 
                 this.#pkgLengthValidator.setPkgLength(
                   common.PKG_LENGTHS.V1.OBJ_REC_BASE_PKG +
@@ -546,4 +545,4 @@ class MqttHandler {
   }
 }
 
-export default MqttHandler;
+module.exports = MqttHandler;

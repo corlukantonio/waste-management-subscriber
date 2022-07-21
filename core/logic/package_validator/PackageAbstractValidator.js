@@ -3,7 +3,7 @@
 //#region Imports
 
 // Core - Logic
-import PackageValidator from './PackageValidator';
+const PackageValidator = require('./PackageValidator');
 
 //#endregion
 
@@ -52,4 +52,4 @@ class PackageAbstractValidator {
   }
 }
 
-export default PackageAbstractValidator;
+module.exports = PackageAbstractValidator;
