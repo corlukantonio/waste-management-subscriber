@@ -87,7 +87,8 @@ class LogHandler {
         break;
 
       case common.LOG_MSG_TYPES.ERR_PKG_TYPE:
-        'Package type error! Expected ' + args[0] + ', got ' + args[1] + '.';
+        logMessage +=
+          'Package type error! Expected ' + args[0] + ', got ' + args[1] + '.';
 
         break;
 

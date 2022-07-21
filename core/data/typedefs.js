@@ -89,6 +89,7 @@
  * @prop {Buffer} Mac - MAC.
  * @prop {boolean} IsActivated - Is activated.
  * @prop {Buffer} ActivationCode - Activation code.
+ * @prop {Buffer} Settings - Settings.
  */
 
 /**

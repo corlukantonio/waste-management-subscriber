@@ -103,6 +103,7 @@ class DbHandler {
             Mac: columns[1].value,
             IsActivated: columns[2].value,
             ActivationCode: columns[3].value,
+            Settings: columns[4].value,
           });
         });
 
