@@ -14,8 +14,9 @@
  * @prop {number} DB_ROW_INSERTED - Database row inserted.
  * @prop {number} DB_ROW_UPDATED - Database row updated.
  * @prop {number} MQTT_CONNECTED - MQTT connected.
- * @prop {number} ERR_PKG_LEN - Error package length.
  * @prop {number} ERR_PKG_TYPE - Error package type.
+ * @prop {number} ERR_PKG_VERSION - Error package version.
+ * @prop {number} ERR_PKG_LEN - Error package length.
  * @prop {number} ERR_PKG_CRC - Error package CRC.
  * @prop {number} OBJ_DUPLICATE - Object duplicate.
  * @prop {number} OBJ_NOT_ACT - Object not activated.
@@ -29,6 +30,12 @@
  * @prop {number} OBJ_REC_CFG_REQ_PKG - ObjectRecordConfigRequestPackage.
  * @prop {number} OBJ_REC_CFG_APV_REQ_PKG - ObjectRecordConfigApprovalRequestPackage.
  * @prop {number} OBJ_REC_BASE_PKG - ObjectRecordBasePackage.
+ */
+
+/**
+ * @typedef PackageVersions
+ * @type {object}
+ * @prop {number} V1 - Version 1.
  */
 
 /**
@@ -63,6 +70,7 @@
  * @prop {LogMessageTypes} LOG_MSG_TYPES - Log message types.
  * @prop {Array.<String>} MQTT_TOPICS - MQTT topics.
  * @prop {PackageTypes} PKG_TYPES - Package types.
+ * @prop {PackageVersions} PKG_VERSIONS - Package versions.
  * @prop {PackageLengths} PKG_LENGTHS - Package lengths.
  * @prop {ValueTypes} VAL_TYPES - Value types.
  * @prop {ValueLengths} VAL_LENGTHS - Value lengths.
@@ -129,4 +137,15 @@
  * @prop {number} crc - CRC.
  */
 
-module.exports = null;
+/**
+ * @typedef Types
+ * @type {object}
+ * @prop {Common} Common - Common.
+ * @prop {DbConfig} DbConfig - Database config.
+ * @prop {WmObject} WmObject - Object.
+ * @prop {ObjectRegistrationRequest} ObjectRegistrationRequest - Object registration request.
+ * @prop {ObjectActivationRequest} ObjectActivationRequest - Object activation request.
+ * @prop {ObjectRecord} ObjectRecord - Object record.
+ */
+
+export default Types;

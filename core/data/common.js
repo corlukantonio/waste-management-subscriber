@@ -3,14 +3,14 @@
 //#region Imports
 
 // Core - Data
-const typedefs = require('./typedefs');
+import Types from './types';
 
 //#endregion
 
 /**
  * Common.
  *
- * @type {typedefs.Common}
+ * @type {Types["Common"]}
  */
 const common = {
   DB_TABLES: {
@@ -23,11 +23,12 @@ const common = {
     DB_ROW_INSERTED: 0x02,
     DB_ROW_UPDATED: 0x03,
     MQTT_CONNECTED: 0x04,
-    ERR_PKG_LEN: 0x05,
-    ERR_PKG_TYPE: 0x06,
-    ERR_PKG_CRC: 0x07,
-    OBJ_DUPLICATE: 0x08,
-    OBJ_NOT_ACT: 0x09,
+    ERR_PKG_TYPE: 0x05,
+    ERR_PKG_VERSION: 0x06,
+    ERR_PKG_LEN: 0x07,
+    ERR_PKG_CRC: 0x08,
+    OBJ_DUPLICATE: 0x09,
+    OBJ_NOT_ACT: 0x0a,
   },
 
   MQTT_TOPICS: [
@@ -46,6 +47,10 @@ const common = {
     OBJ_REC_CFG_REQ_PKG: 0x03,
     OBJ_REC_CFG_APV_REQ_PKG: 0x04,
     OBJ_REC_BASE_PKG: 0x05,
+  },
+
+  PKG_VERSIONS: {
+    V1: 0x01,
   },
 
   PKG_LENGTHS: {
@@ -69,4 +74,4 @@ const common = {
   },
 };
 
-module.exports = common;
+export default common;

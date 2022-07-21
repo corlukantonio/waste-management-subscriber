@@ -3,8 +3,8 @@
 //#region Imports
 
 // Core - Data
-const common = require('../data/common');
-const typedefs = require('../data/typedefs');
+import common from '../data/common';
+import Types from '../data/types';
 
 //#endregion
 
@@ -144,38 +144,16 @@ class PackageParser {
   }
 
   /**
-   * Check CRC.
-   *
-   * @param {typedefs.ObjectRegistrationRequest | typedefs.ObjectActivationRequest | typedefs.ObjectRecord} pkg Package.
-   * @param {Buffer} buff Buffer.
-   * @return {boolean} Check.
-   */
-  checkCrc(pkg, buff) {
-    /**
-     * Check.
-     *
-     * @type {boolean}
-     */
-    let isEqual = false;
-
-    if (pkg.crc === this.getCrc(buff.slice(0, -1))) {
-      isEqual = true;
-    }
-
-    return isEqual;
-  }
-
-  /**
    * Get object registration request (v1).
    *
    * @param {Buffer} buff Buffer.
-   * @return {typedefs.ObjectRegistrationRequest} Object registration request.
+   * @return {Types["ObjectRegistrationRequest"]} Object registration request.
    */
   objectRegistrationRequestV1(buff) {
     /**
      * Parsed package.
      *
-     * @type {typedefs.ObjectRegistrationRequest}
+     * @type {Types["ObjectRegistrationRequest"]}
      */
     let parsedPackage = {
       packageType: 0x00,
@@ -202,13 +180,13 @@ class PackageParser {
    * Get object activation request (v1).
    *
    * @param {Buffer} buff Buffer.
-   * @return {typedefs.ObjectActivationRequest} Object activation request.
+   * @return {Types["ObjectActivationRequest"]} Object activation request.
    */
   getObjectActivationRequestV1(buff) {
     /**
      * Parsed package.
      *
-     * @type {typedefs.ObjectActivationRequest}
+     * @type {Types["ObjectActivationRequest"]}
      */
     let parsedPackage = {
       packageType: 0x00,
@@ -298,13 +276,13 @@ class PackageParser {
    * Get object record (v1).
    *
    * @param {Buffer} buff Buffer.
-   * @return {typedefs.ObjectRecord} Object record.
+   * @return {Types["ObjectRecord"]} Object record.
    */
   getObjectRecordV1(buff) {
     /**
      * Parsed package.
      *
-     * @type {typedefs.ObjectRecord}
+     * @type {Types["ObjectRecord"]}
      */
     let parsedPackage = {
       packageType: 0x00,
@@ -368,4 +346,4 @@ class PackageParser {
   }
 }
 
-module.exports = PackageParser;
+export default PackageParser;

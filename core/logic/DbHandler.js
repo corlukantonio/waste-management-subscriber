@@ -2,15 +2,15 @@
 
 //#region Imports
 
-const { Connection, TYPES, Request } = require('tedious');
+import { Connection, TYPES, Request } from 'tedious';
 
 // Core - Logic
-const LogHandler = require('./LogHandler');
+import LogHandler from './LogHandler';
 
 // Core - Data
-const queries = require('../data/queries');
-const typedefs = require('../data/typedefs');
-const common = require('../data/common');
+import queries from '../data/queries';
+import Types from '../data/types';
+import common from '../data/common';
 
 //#endregion
 
@@ -28,7 +28,7 @@ class DbHandler {
   /**
    * Database config data.
    *
-   * @type {typedefs.DbConfig}
+   * @type {Types["DbConfig"]}
    */
   #config = {
     server: 'waste-management.database.windows.net',
@@ -55,7 +55,7 @@ class DbHandler {
   /**
    * WmObjects.
    *
-   * @type {Array.<typedefs.WmObject>}
+   * @type {Array.<Types["WmObject"]>}
    */
   #wmObjects = [];
 
@@ -66,7 +66,7 @@ class DbHandler {
     /**
      * Get WmObjects.
      *
-     * @return {Array.<typedefs.WmObject>} WmObjects.
+     * @return {Array.<Types["WmObject"]>} WmObjects.
      */
     this.getWmObjects = () => this.#wmObjects;
   }
@@ -89,7 +89,7 @@ class DbHandler {
    *
    * @param {string} query SQL query.
    * @param {Request} req Request.
-   * @param {...*} args Arguments.
+   * @param {...(Buffer | boolean | number | string)} args Arguments.
    * @return {void}
    */
   execSql(query, req, ...args) {
@@ -219,4 +219,4 @@ class DbHandler {
   }
 }
 
-module.exports = DbHandler;
+export default DbHandler;

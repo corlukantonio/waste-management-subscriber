@@ -2,203 +2,28 @@
 
 //#region Imports
 
-const mqtt = require('mqtt');
-const uuid = require('uuid');
+import { Client, connect as _connect } from 'mqtt';
+import { v4 } from 'uuid';
 
-const { Request } = require('tedious');
+import { Request } from 'tedious';
 
 // Core - Logic
-const DbHandler = require('./DbHandler');
-const LogHandler = require('./LogHandler');
-const MqttMessageHandler = require('./MqttMessageHandler');
-const PackageParser = require('./PackageParser');
+import DbHandler from './DbHandler';
+import LogHandler from './LogHandler';
+import PackageParser from './PackageParser';
+
+// Core - Logic - Package validator
+import PackageCrcValidator from './package_validator/PackageCrcValidator';
+import PackageLengthValidator from './package_validator/PackageLengthValidator';
+import PackageTypeValidator from './package_validator/PackageTypeValidator';
+import PackageVersionValidator from './package_validator/PackageVersionValidator';
 
 // Core - Data
-const common = require('../data/common');
-const queries = require('../data/queries');
-const typedefs = require('../data/typedefs');
+import common from '../data/common';
+import queries from '../data/queries';
+import Types from '../data/types';
 
 //#endregion
-
-/**
- * The default chaining behavior can be implemented inside a base handler class.
- *
- * @abstract
- * @implements {MqttMessageHandler}
- */
-class AbstractMqttMessageHandler {
-  /**
-   * Next handler.
-   *
-   * @type {MqttMessageHandler}
-   */
-  #nextHandler;
-
-  /**
-   * Set next.
-   *
-   * @param {MqttMessageHandler} handler Handler.
-   * @return {MqttMessageHandler} MQTT message handler.
-   */
-  setNext(handler) {
-    this.#nextHandler = handler;
-
-    return this.#nextHandler;
-  }
-
-  /**
-   * Handle.
-   *
-   * @param {Buffer} msg Message.
-   * @return {boolean} True or false.
-   */
-  handle(msg) {
-    if (this.#nextHandler) {
-      return this.#nextHandler.handle(msg);
-    }
-
-    return true;
-  }
-}
-
-/**
- * Package type handler.
- *
- * @extends AbstractMqttMessageHandler
- */
-class PackageTypeHandler extends AbstractMqttMessageHandler {
-  /**
-   * Package type.
-   *
-   * @type {number}
-   */
-  #packageType;
-
-  constructor() {
-    super();
-
-    /**
-     * Set package type.
-     *
-     * @param {number} packageType Package type.
-     */
-    this.setPackageType = (packageType) => {
-      this.#packageType = packageType;
-    };
-  }
-
-  /**
-   * Handle.
-   *
-   * @param {Buffer} msg Message.
-   * @return {boolean} True or false.
-   */
-  handle(msg) {
-    if (msg[0] === this.#packageType) {
-      return super.handle(msg);
-    }
-
-    console.log(
-      LogHandler.getInstance().getLogMessage(
-        common.LOG_MSG_TYPES.ERR_PKG_TYPE,
-        this.#packageType,
-        msg[0]
-      )
-    );
-
-    return false;
-  }
-}
-
-/**
- * Package version handler.
- *
- * @extends AbstractMqttMessageHandler
- */
-class PackageVersionHandler extends AbstractMqttMessageHandler {
-  /**
-   * Package version.
-   *
-   * @type {number}
-   */
-  #packageVersion;
-
-  constructor() {
-    super();
-
-    /**
-     * Set package version.
-     *
-     * @param {number} packageVersion Package version
-     */
-    this.setPackageVersion = (packageVersion) => {
-      this.#packageVersion = packageVersion;
-    };
-  }
-
-  /**
-   * Handle.
-   *
-   * @param {Buffer} msg Message.
-   * @return {boolean} True or false.
-   */
-  handle(msg) {
-    if (msg[1] === this.#packageVersion) {
-      return super.handle(msg);
-    }
-
-    return false;
-  }
-}
-
-/**
- * Package length handler.
- *
- * @extends AbstractMqttMessageHandler
- */
-class PackageLengthHandler extends AbstractMqttMessageHandler {
-  /**
-   * Package length.
-   *
-   * @type {number}
-   */
-  #packageLength;
-
-  constructor() {
-    super();
-
-    /**
-     * Set package length.
-     *
-     * @param {number} packageLength Package length.
-     */
-    this.setPackageLength = (packageLength) => {
-      this.#packageLength = packageLength;
-    };
-  }
-
-  /**
-   * Handle.
-   *
-   * @param {Buffer} msg Message.
-   * @return {boolean} True or false.
-   */
-  handle(msg) {
-    if (msg.byteLength === this.#packageLength) {
-      return super.handle(msg);
-    }
-
-    console.log(
-      LogHandler.getInstance().getLogMessage(
-        common.LOG_MSG_TYPES.ERR_PKG_LEN,
-        this.#packageLength,
-        msg.byteLength
-      )
-    );
-
-    return false;
-  }
-}
 
 /**
  * Class for MQTT handling.
@@ -211,43 +36,43 @@ class MqttHandler {
    */
   static #instance;
 
-  // /**
-  //  * URL.
-  //  *
-  //  * @type {string}
-  //  */
-  // #url = process.env.CLOUDMQTT_URL || 'mqtt://localhost:1883';
-
-  // /**
-  //  * MQTT client.
-  //  *
-  //  * @type {mqtt.Client}
-  //  */
-  // #client = mqtt.connect(this.#url);
-
   /**
-   * MQTT server URL.
+   * URL.
    *
    * @type {string}
    */
-  #url = 'mqtt://driver.cloudmqtt.com';
+  #url = process.env.CLOUDMQTT_URL || 'mqtt://localhost:1883';
 
   /**
    * MQTT client.
    *
-   * @type {mqtt.Client}
+   * @type {Client}
    */
-  #client = mqtt.connect(this.#url, {
-    clean: true,
-    port: 18850,
-    username: 'oxiztsaz',
-    password: 'fYBafc9Fy6pZ',
-  });
+  #client = _connect(this.#url);
+
+  // /**
+  //  * MQTT server URL.
+  //  *
+  //  * @type {string}
+  //  */
+  // #url = 'mqtt://driver.cloudmqtt.com';
+
+  // /**
+  //  * MQTT client.
+  //  *
+  //  * @type {Client}
+  //  */
+  // #client = _connect(this.#url, {
+  //   clean: true,
+  //   port: 18850,
+  //   username: 'oxiztsaz',
+  //   password: 'fYBafc9Fy6pZ',
+  // });
 
   /**
    * Object registration request.
    *
-   * @type {typedefs.ObjectRegistrationRequest}
+   * @type {Types["ObjectRegistrationRequest"]}
    */
   #objectRegistrationRequest = {
     packageType: 0x00,
@@ -260,7 +85,7 @@ class MqttHandler {
   /**
    * Object activation request.
    *
-   * @type {typedefs.ObjectActivationRequest}
+   * @type {Types["ObjectActivationRequest"]}
    */
   #objectActivationRequest = {
     packageType: 0x00,
@@ -274,7 +99,7 @@ class MqttHandler {
   /**
    * Object record.
    *
-   * @type {typedefs.ObjectRecord}
+   * @type {Types["ObjectRecord"]}
    */
   #objectRecord = {
     packageType: 0x00,
@@ -288,25 +113,32 @@ class MqttHandler {
   };
 
   /**
-   * Package type handler.
+   * Package type validator.
    *
-   * @type {PackageTypeHandler}
+   * @type {PackageTypeValidator}
    */
-  #pkgTypeHandler = new PackageTypeHandler();
+  #pkgTypeValidator = new PackageTypeValidator();
 
   /**
-   * Package version handler.
+   * Package version validator.
    *
-   * @type {PackageVersionHandler}
+   * @type {PackageVersionValidator}
    */
-  #pkgVersionHandler = new PackageVersionHandler();
+  #pkgVersionValidator = new PackageVersionValidator();
 
   /**
-   * Package length handler.
+   * Package length validator.
    *
-   * @type {PackageLengthHandler}
+   * @type {PackageLengthValidator}
    */
-  #pkgLengthHandler = new PackageLengthHandler();
+  #pkgLengthValidator = new PackageLengthValidator();
+
+  /**
+   * Package CRC validator.
+   *
+   * @type {PackageCrcValidator}
+   */
+  #pkgCrcValidator = new PackageCrcValidator();
 
   /**
    * @private
@@ -322,13 +154,14 @@ class MqttHandler {
     /**
      * Get MQTT client.
      *
-     * @return {mqtt.Client} MQTT client.
+     * @return {Client} MQTT client.
      */
     this.getClient = () => this.#client;
 
-    this.#pkgTypeHandler
-      .setNext(this.#pkgVersionHandler)
-      .setNext(this.#pkgLengthHandler);
+    this.#pkgTypeValidator
+      .setNext(this.#pkgVersionValidator)
+      .setNext(this.#pkgLengthValidator)
+      .setNext(this.#pkgCrcValidator);
   }
 
   /**
@@ -425,17 +258,24 @@ class MqttHandler {
           if (msg.byteLength > 0) {
             switch (topic) {
               case common.MQTT_TOPICS[0]:
-                this.#pkgTypeHandler.setPackageType(
+                this.#pkgTypeValidator.setPkgType(
                   common.PKG_TYPES.OBJ_REG_REQ_PKG
                 );
 
-                this.#pkgVersionHandler.setPackageVersion(0x01);
+                this.#pkgVersionValidator.setPkgVersion(0x01);
 
-                this.#pkgLengthHandler.setPackageLength(
+                this.#pkgLengthValidator.setPkgLength(
                   common.PKG_LENGTHS.V1.OBJ_REG_REQ_PKG
                 );
 
-                if (this.#pkgTypeHandler.handle(msg)) {
+                this.#pkgCrcValidator.setPkgCrc(msg.slice(-1).readUint8());
+
+                if (this.#pkgTypeValidator.isValid(msg)) {
+                  this.#objectRegistrationRequest =
+                    PackageParser.getInstance().objectRegistrationRequestV1(
+                      msg
+                    );
+
                   /**
                    * Select.
                    *
@@ -463,26 +303,6 @@ class MqttHandler {
                   sqlSelWmObjects.on('requestCompleted', async () => {
                     let isObjectDuplicate = false;
 
-                    this.#objectRegistrationRequest =
-                      PackageParser.getInstance().objectRegistrationRequestV1(
-                        msg
-                      );
-
-                    if (
-                      !PackageParser.getInstance().checkCrc(
-                        this.#objectRegistrationRequest,
-                        msg
-                      )
-                    ) {
-                      console.log(
-                        LogHandler.getInstance().getLogMessage(
-                          common.LOG_MSG_TYPES.ERR_PKG_CRC
-                        )
-                      );
-
-                      return;
-                    }
-
                     for (
                       let i = 0;
                       i < DbHandler.getInstance().getWmObjects().length;
@@ -501,9 +321,9 @@ class MqttHandler {
                       DbHandler.getInstance().execSql(
                         queries.SQL_INS_WM_OBJECT,
                         sqlInsWmObject,
-                        Buffer.from(uuid.v4()),
+                        Buffer.from(v4()),
                         this.#objectRegistrationRequest.mac,
-                        uuid.v4().toString(),
+                        v4().toString(),
                         this.getGeneratedActivationCode()
                       );
                     } else {
@@ -524,17 +344,24 @@ class MqttHandler {
                 break;
 
               case common.MQTT_TOPICS[1]:
-                this.#pkgTypeHandler.setPackageType(
+                this.#pkgTypeValidator.setPkgType(
                   common.PKG_TYPES.OBJ_ACT_REQ_PKG
                 );
 
-                this.#pkgVersionHandler.setPackageVersion(0x01);
+                this.#pkgVersionValidator.setPkgVersion(0x01);
 
-                this.#pkgLengthHandler.setPackageLength(
+                this.#pkgLengthValidator.setPkgLength(
                   common.PKG_LENGTHS.V1.OBJ_ACT_REQ_PKG
                 );
 
-                if (this.#pkgTypeHandler.handle(msg)) {
+                this.#pkgCrcValidator.setPkgCrc(msg.slice(-1).readUint8());
+
+                if (this.#pkgTypeValidator.isValid(msg)) {
+                  this.#objectActivationRequest =
+                    PackageParser.getInstance().getObjectActivationRequestV1(
+                      msg
+                    );
+
                   /**
                    * Select.
                    *
@@ -560,26 +387,6 @@ class MqttHandler {
                   );
 
                   sqlSelWmObjects.on('requestCompleted', async () => {
-                    this.#objectActivationRequest =
-                      PackageParser.getInstance().getObjectActivationRequestV1(
-                        msg
-                      );
-
-                    if (
-                      !PackageParser.getInstance().checkCrc(
-                        this.#objectActivationRequest,
-                        msg
-                      )
-                    ) {
-                      console.log(
-                        LogHandler.getInstance().getLogMessage(
-                          common.LOG_MSG_TYPES.ERR_PKG_CRC
-                        )
-                      );
-
-                      return;
-                    }
-
                     for (
                       let i = 0;
                       i < DbHandler.getInstance().getWmObjects().length;
@@ -634,20 +441,25 @@ class MqttHandler {
                 break;
 
               case common.MQTT_TOPICS[4]:
-                this.#pkgTypeHandler.setPackageType(
+                this.#pkgTypeValidator.setPkgType(
                   common.PKG_TYPES.OBJ_REC_BASE_PKG
                 );
 
-                this.#pkgVersionHandler.setPackageVersion(0x01);
+                this.#pkgVersionValidator.setPkgVersion(0x01);
 
-                this.#pkgLengthHandler.setPackageLength(
+                this.#pkgLengthValidator.setPkgLength(
                   common.PKG_LENGTHS.V1.OBJ_REC_BASE_PKG +
                     PackageParser.getInstance().getObjectRecordV1ValuesLength(
                       msg
                     )
                 );
 
-                if (this.#pkgTypeHandler.handle(msg)) {
+                this.#pkgCrcValidator.setPkgCrc(msg.slice(-1).readUint8());
+
+                if (this.#pkgTypeValidator.isValid(msg)) {
+                  this.#objectRecord =
+                    PackageParser.getInstance().getObjectRecordV1(msg);
+
                   /**
                    * Select.
                    *
@@ -673,24 +485,6 @@ class MqttHandler {
                   );
 
                   sqlSelWmObjects.on('requestCompleted', async () => {
-                    this.#objectRecord =
-                      PackageParser.getInstance().getObjectRecordV1(msg);
-
-                    if (
-                      !PackageParser.getInstance().checkCrc(
-                        this.#objectRecord,
-                        msg
-                      )
-                    ) {
-                      console.log(
-                        LogHandler.getInstance().getLogMessage(
-                          common.LOG_MSG_TYPES.ERR_PKG_CRC
-                        )
-                      );
-
-                      return;
-                    }
-
                     for (
                       let i = 0;
                       i < DbHandler.getInstance().getWmObjects().length;
@@ -752,4 +546,4 @@ class MqttHandler {
   }
 }
 
-module.exports = MqttHandler;
+export default MqttHandler;
