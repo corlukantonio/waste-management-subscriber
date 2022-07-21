@@ -27,4 +27,4 @@ class PackageValidator {
   }
 }
 
-export default PackageValidator;
+module.exports = PackageValidator;

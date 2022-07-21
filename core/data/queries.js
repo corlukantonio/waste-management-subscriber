@@ -3,7 +3,7 @@
 //#region Imports
 
 // Core - Data
-import common from './common';
+const common = require('./common');
 
 //#endregion
 
@@ -56,4 +56,4 @@ const queries = {
   `,
 };
 
-export default queries;
+module.exports = queries;

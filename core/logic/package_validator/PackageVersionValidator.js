@@ -3,11 +3,11 @@
 //#region Imports
 
 // Core - Logic
-import LogHandler from '../LogHandler';
-import PackageAbstractValidator from './PackageAbstractValidator';
+const LogHandler = require('../LogHandler');
+const PackageAbstractValidator = require('./PackageAbstractValidator');
 
 // Core - Data
-import common from '../../data/common';
+const common = require('../../data/common');
 
 //#endregion
 
@@ -59,4 +59,4 @@ class PackageVersionValidator extends PackageAbstractValidator {
   }
 }
 
-export default PackageVersionValidator;
+module.exports = PackageVersionValidator;

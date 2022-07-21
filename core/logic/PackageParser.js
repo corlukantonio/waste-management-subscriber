@@ -3,8 +3,8 @@
 //#region Imports
 
 // Core - Data
-import common from '../data/common';
-import Types from '../data/types';
+const common = require('../data/common');
+const types = require('../data/types');
 
 //#endregion
 
@@ -147,13 +147,13 @@ class PackageParser {
    * Get object registration request (v1).
    *
    * @param {Buffer} buff Buffer.
-   * @return {Types["ObjectRegistrationRequest"]} Object registration request.
+   * @return {types.ObjectRegistrationRequest} Object registration request.
    */
   objectRegistrationRequestV1(buff) {
     /**
      * Parsed package.
      *
-     * @type {Types["ObjectRegistrationRequest"]}
+     * @type {types.ObjectRegistrationRequest}
      */
     let parsedPackage = {
       packageType: 0x00,
@@ -180,13 +180,13 @@ class PackageParser {
    * Get object activation request (v1).
    *
    * @param {Buffer} buff Buffer.
-   * @return {Types["ObjectActivationRequest"]} Object activation request.
+   * @return {types.ObjectActivationRequest} Object activation request.
    */
   getObjectActivationRequestV1(buff) {
     /**
      * Parsed package.
      *
-     * @type {Types["ObjectActivationRequest"]}
+     * @type {types.ObjectActivationRequest}
      */
     let parsedPackage = {
       packageType: 0x00,
@@ -276,13 +276,13 @@ class PackageParser {
    * Get object record (v1).
    *
    * @param {Buffer} buff Buffer.
-   * @return {Types["ObjectRecord"]} Object record.
+   * @return {types.ObjectRecord} Object record.
    */
   getObjectRecordV1(buff) {
     /**
      * Parsed package.
      *
-     * @type {Types["ObjectRecord"]}
+     * @type {types.ObjectRecord}
      */
     let parsedPackage = {
       packageType: 0x00,
@@ -346,4 +346,4 @@ class PackageParser {
   }
 }
 
-export default PackageParser;
+module.exports = PackageParser;
