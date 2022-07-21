@@ -3,7 +3,7 @@
 //#region Imports
 
 // Core - Data
-const common = require('../data/common');
+import common from '../data/common';
 
 //#endregion
 
@@ -40,7 +40,7 @@ class LogHandler {
    * Get log message.
    *
    * @param {number} type Log message type.
-   * @param {...*} args Arguments.
+   * @param {...(Buffer | boolean | number | string)} args Arguments.
    * @return {string} Log.
    */
   getLogMessage(type, ...args) {
@@ -76,6 +76,22 @@ class LogHandler {
         logMessage += 'Connected to the "' + args[0] + '" MQTT broker.';
         break;
 
+      case common.LOG_MSG_TYPES.ERR_PKG_TYPE:
+        logMessage +=
+          'Package type error! Expected ' + args[0] + ', got ' + args[1] + '.';
+
+        break;
+
+      case common.LOG_MSG_TYPES.ERR_PKG_VERSION:
+        logMessage +=
+          'Package version ' +
+          args[0] +
+          ' is not supported. Supported versions are: ' +
+          Object.values(common.PKG_VERSIONS).join(', ') +
+          '.';
+
+        break;
+
       case common.LOG_MSG_TYPES.ERR_PKG_LEN:
         logMessage +=
           'Package length error! Expected ' +
@@ -83,12 +99,6 @@ class LogHandler {
           ', got ' +
           args[1] +
           '.';
-
-        break;
-
-      case common.LOG_MSG_TYPES.ERR_PKG_TYPE:
-        logMessage +=
-          'Package type error! Expected ' + args[0] + ', got ' + args[1] + '.';
 
         break;
 
@@ -116,4 +126,4 @@ class LogHandler {
   }
 }
 
-module.exports = LogHandler;
+export default LogHandler;
