@@ -3,23 +3,17 @@
 //#region Imports
 
 const mqtt = require('mqtt');
-const { Request } = require('tedious');
-const uuid = require('uuid');
 
 // Core - Logic
-const DbHandler = require('../logic/DbHandler');
 const LogHandler = require('../logic/LogHandler');
-const PackageParser = require('../logic/PackageParser');
 
-// Core - Logic - Package validator
-const PackageCrcValidator = require('./package_validator/PackageCrcValidator');
-const PackageLengthValidator = require('./package_validator/PackageLengthValidator');
-const PackageTypeValidator = require('./package_validator/PackageTypeValidator');
-const PackageVersionValidator = require('./package_validator/PackageVersionValidator');
+// Core - Logic - MQTT message handler
+const ObjectActivationRequest = require('./mqtt_message_handler/ObjectActivationRequest');
+const ObjectRecord = require('./mqtt_message_handler/ObjectRecord');
+const ObjectRegistrationRequest = require('./mqtt_message_handler/ObjectRegistrationRequest');
 
 // Core - Data
 const common = require('../data/common');
-const queries = require('../data/queries');
 const types = require('../data/types');
 
 //#endregion
@@ -35,109 +29,38 @@ class MqttHandler {
    */
   static #instance;
 
-  // /**
-  //  * URL.
-  //  *
-  //  * @type {string}
-  //  */
-  // #url = process.env.CLOUDMQTT_URL || 'mqtt://localhost:1883';
-
-  // /**
-  //  * MQTT client.
-  //  *
-  //  * @type {mqtt.Client}
-  //  */
-  // #client = mqtt.connect(this.#url);
-
   /**
-   * MQTT server URL.
+   * URL.
    *
    * @type {string}
    */
-  #url = 'mqtt://driver.cloudmqtt.com';
+  #url = process.env.CLOUDMQTT_URL || 'mqtt://localhost:1883';
 
   /**
    * MQTT client.
    *
    * @type {mqtt.Client}
    */
-  #client = mqtt.connect(this.#url, {
-    clean: true,
-    port: 18850,
-    username: 'oxiztsaz',
-    password: 'fYBafc9Fy6pZ',
-  });
+  #client = mqtt.connect(this.#url);
 
-  /**
-   * Object registration request.
-   *
-   * @type {types.ObjectRegistrationRequest}
-   */
-  #objectRegistrationRequest = {
-    packageType: 0x00,
-    packageVersion: 0x00,
-    mac: Buffer.from([0x00, 0x00, 0x00, 0x00, 0x00, 0x00]),
-    rtc: [0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
-    crc: 0x00,
-  };
+  // /**
+  //  * MQTT server URL.
+  //  *
+  //  * @type {string}
+  //  */
+  // #url = 'mqtt://driver.cloudmqtt.com';
 
-  /**
-   * Object activation request.
-   *
-   * @type {types.ObjectActivationRequest}
-   */
-  #objectActivationRequest = {
-    packageType: 0x00,
-    packageVersion: 0x00,
-    mac: Buffer.from([0x00, 0x00, 0x00, 0x00, 0x00, 0x00]),
-    rtc: [0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
-    activationCode: Buffer.from([0x00, 0x00, 0x00, 0x00]),
-    crc: 0x00,
-  };
-
-  /**
-   * Object record.
-   *
-   * @type {types.ObjectRecord}
-   */
-  #objectRecord = {
-    packageType: 0x00,
-    packageVersion: 0x00,
-    mac: Buffer.from([0x00, 0x00, 0x00, 0x00, 0x00, 0x00]),
-    rtc: [0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
-    numberOfValues: 0,
-    values: {},
-    rssi: 0,
-    crc: 0x00,
-  };
-
-  /**
-   * Package type validator.
-   *
-   * @type {PackageTypeValidator}
-   */
-  #pkgTypeValidator = new PackageTypeValidator();
-
-  /**
-   * Package version validator.
-   *
-   * @type {PackageVersionValidator}
-   */
-  #pkgVersionValidator = new PackageVersionValidator();
-
-  /**
-   * Package length validator.
-   *
-   * @type {PackageLengthValidator}
-   */
-  #pkgLengthValidator = new PackageLengthValidator();
-
-  /**
-   * Package CRC validator.
-   *
-   * @type {PackageCrcValidator}
-   */
-  #pkgCrcValidator = new PackageCrcValidator();
+  // /**
+  //  * MQTT client.
+  //  *
+  //  * @type {mqtt.Client}
+  //  */
+  // #client = mqtt.connect(this.#url, {
+  //   clean: true,
+  //   port: 18850,
+  //   username: 'oxiztsaz',
+  //   password: 'fYBafc9Fy6pZ',
+  // });
 
   /**
    * @private
@@ -156,11 +79,6 @@ class MqttHandler {
      * @return {mqtt.Client} MQTT client.
      */
     this.getClient = () => this.#client;
-
-    this.#pkgTypeValidator
-      .setNext(this.#pkgVersionValidator)
-      .setNext(this.#pkgLengthValidator)
-      .setNext(this.#pkgCrcValidator);
   }
 
   /**
@@ -174,68 +92,6 @@ class MqttHandler {
     }
 
     return MqttHandler.#instance;
-  }
-
-  /**
-   * Get generated activation code.
-   *
-   * @return {Buffer} Activation code.
-   */
-  getGeneratedActivationCode() {
-    /**
-     * Activation code.
-     *
-     * @type {Buffer}
-     */
-    let activationCode = Buffer.from([0x00, 0x00, 0x00, 0x00]);
-
-    /**
-     * Activation code array.
-     *
-     * @type {Array.<Number>}
-     */
-    let activationCodeArr = [];
-
-    for (let i = 0; i < 4; i++) {
-      activationCodeArr[i] = Math.floor(Math.random() * 9)
-        .toString()
-        .charCodeAt(0);
-    }
-
-    activationCode = Buffer.from(activationCodeArr);
-
-    return activationCode;
-  }
-
-  /**
-   * Get set time command.
-   *
-   * @return {string} Set time command.
-   */
-  getStCmd() {
-    /**
-     * Set time command.
-     *
-     * @type {string}
-     */
-    let stCmd = '';
-
-    /**
-     * Date.
-     *
-     * @type {Date}
-     */
-    let date = new Date(Date.now());
-
-    stCmd += 'st ';
-    stCmd += date.getUTCFullYear() + ' ';
-    stCmd += date.getUTCMonth() + 1 + ' ';
-    stCmd += date.getUTCDate() + ' ';
-    stCmd += date.getUTCHours() + ' ';
-    stCmd += date.getUTCMinutes() + ' ';
-    stCmd += date.getUTCSeconds();
-
-    return stCmd;
   }
 
   /**
@@ -257,169 +113,28 @@ class MqttHandler {
           if (msg.byteLength > 0) {
             switch (topic) {
               case common.MQTT_TOPICS[0]:
-                this.#pkgTypeValidator.setPkgType(
-                  common.PKG_TYPES.OBJ_REG_REQ_PKG
+                /**
+                 * Object registration request handler.
+                 *
+                 * @type {ObjectRegistrationRequest}
+                 */
+                let objectRegistrationRequest = new ObjectRegistrationRequest(
+                  msg
                 );
 
-                this.#pkgVersionValidator.setPkgVersion(common.PKG_VERSIONS.V1);
-
-                this.#pkgLengthValidator.setPkgLength(
-                  common.PKG_LENGTHS.V1.OBJ_REG_REQ_PKG
-                );
-
-                this.#pkgCrcValidator.setPkgCrc(msg.slice(-1).readUint8());
-
-                if (this.#pkgTypeValidator.isValid(msg)) {
-                  this.#objectRegistrationRequest =
-                    PackageParser.getInstance().objectRegistrationRequestV1(
-                      msg
-                    );
-
-                  /**
-                   * Select.
-                   *
-                   * @type {Request}
-                   */
-                  let sqlSelWmObjects = new Request(
-                    queries.SQL_SEL_WM_OBJECTS,
-                    async (err) => {
-                      if (err) console.log(err.message);
-                    }
-                  );
-
-                  /**
-                   * Insert.
-                   *
-                   * @type {Request}
-                   */
-                  let sqlInsWmObject = new Request(
-                    queries.SQL_INS_WM_OBJECT,
-                    async (err) => {
-                      if (err) console.log(err.message);
-                    }
-                  );
-
-                  sqlSelWmObjects.on('requestCompleted', async () => {
-                    let isObjectDuplicate = false;
-
-                    for (
-                      let i = 0;
-                      i < DbHandler.getInstance().getWmObjects().length;
-                      i++
-                    ) {
-                      if (
-                        DbHandler.getInstance()
-                          .getWmObjects()
-                          [i].Mac.equals(this.#objectRegistrationRequest.mac)
-                      ) {
-                        isObjectDuplicate = true;
-                      }
-                    }
-
-                    if (!isObjectDuplicate) {
-                      DbHandler.getInstance().execSql(
-                        queries.SQL_INS_WM_OBJECT,
-                        sqlInsWmObject,
-                        Buffer.from(uuid.v4()),
-                        this.#objectRegistrationRequest.mac,
-                        uuid.v4().toString(),
-                        this.getGeneratedActivationCode()
-                      );
-                    } else {
-                      console.log(
-                        LogHandler.getInstance().getLogMessage(
-                          common.LOG_MSG_TYPES.OBJ_DUPLICATE
-                        )
-                      );
-                    }
-                  });
-
-                  DbHandler.getInstance().execSql(
-                    queries.SQL_SEL_WM_OBJECTS,
-                    sqlSelWmObjects
-                  );
-                }
+                objectRegistrationRequest.handleMessage();
 
                 break;
 
               case common.MQTT_TOPICS[1]:
-                this.#pkgTypeValidator.setPkgType(
-                  common.PKG_TYPES.OBJ_ACT_REQ_PKG
-                );
+                /**
+                 * Object activation request.
+                 *
+                 * @type {ObjectActivationRequest}
+                 */
+                let objectActivationRequest = new ObjectActivationRequest(msg);
 
-                this.#pkgVersionValidator.setPkgVersion(common.PKG_VERSIONS.V1);
-
-                this.#pkgLengthValidator.setPkgLength(
-                  common.PKG_LENGTHS.V1.OBJ_ACT_REQ_PKG
-                );
-
-                this.#pkgCrcValidator.setPkgCrc(msg.slice(-1).readUint8());
-
-                if (this.#pkgTypeValidator.isValid(msg)) {
-                  this.#objectActivationRequest =
-                    PackageParser.getInstance().getObjectActivationRequestV1(
-                      msg
-                    );
-
-                  /**
-                   * Select.
-                   *
-                   * @type {Request}
-                   */
-                  let sqlSelWmObjects = new Request(
-                    queries.SQL_SEL_WM_OBJECTS,
-                    async (err) => {
-                      if (err) console.log(err.message);
-                    }
-                  );
-
-                  /**
-                   * Update.
-                   *
-                   * @type {Request}
-                   */
-                  let sqlUpdWmObjectIsActivatedById = new Request(
-                    queries.SQL_UPD_WM_OBJECT_IS_ACTIVATED_BY_ID,
-                    async (err) => {
-                      if (err) console.log(err.message);
-                    }
-                  );
-
-                  sqlSelWmObjects.on('requestCompleted', async () => {
-                    for (
-                      let i = 0;
-                      i < DbHandler.getInstance().getWmObjects().length;
-                      i++
-                    ) {
-                      if (
-                        DbHandler.getInstance()
-                          .getWmObjects()
-                          [i].Mac.equals(this.#objectActivationRequest.mac) &&
-                        !DbHandler.getInstance().getWmObjects()[i]
-                          .IsActivated &&
-                        DbHandler.getInstance()
-                          .getWmObjects()
-                          [i].ActivationCode.equals(
-                            this.#objectActivationRequest.activationCode
-                          )
-                      ) {
-                        DbHandler.getInstance().execSql(
-                          queries.SQL_UPD_WM_OBJECT_IS_ACTIVATED_BY_ID,
-                          sqlUpdWmObjectIsActivatedById,
-                          true,
-                          DbHandler.getInstance().getWmObjects()[i].Id
-                        );
-
-                        break;
-                      }
-                    }
-                  });
-
-                  DbHandler.getInstance().execSql(
-                    queries.SQL_SEL_WM_OBJECTS,
-                    sqlSelWmObjects
-                  );
-                }
+                objectActivationRequest.handleMessage();
 
                 break;
 
@@ -440,94 +155,14 @@ class MqttHandler {
                 break;
 
               case common.MQTT_TOPICS[4]:
-                this.#pkgTypeValidator.setPkgType(
-                  common.PKG_TYPES.OBJ_REC_BASE_PKG
-                );
+                /**
+                 * Object record.
+                 *
+                 * @type {ObjectRecord}
+                 */
+                let objectRecord = new ObjectRecord(this.#client, msg);
 
-                this.#pkgVersionValidator.setPkgVersion(common.PKG_VERSIONS.V1);
-
-                this.#pkgLengthValidator.setPkgLength(
-                  common.PKG_LENGTHS.V1.OBJ_REC_BASE_PKG +
-                    PackageParser.getInstance().getObjectRecordV1ValuesLength(
-                      msg
-                    )
-                );
-
-                this.#pkgCrcValidator.setPkgCrc(msg.slice(-1).readUint8());
-
-                if (this.#pkgTypeValidator.isValid(msg)) {
-                  this.#objectRecord =
-                    PackageParser.getInstance().getObjectRecordV1(msg);
-
-                  /**
-                   * Select.
-                   *
-                   * @type {Request}
-                   */
-                  let sqlSelWmObjects = new Request(
-                    queries.SQL_SEL_WM_OBJECTS,
-                    async (err) => {
-                      if (err) console.log(err.message);
-                    }
-                  );
-
-                  /**
-                   * Insert.
-                   *
-                   * @type {Request}
-                   */
-                  let sqlInsWmRecord = new Request(
-                    queries.SQL_INS_WM_RECORD,
-                    async (err) => {
-                      if (err) console.log(err.message);
-                    }
-                  );
-
-                  sqlSelWmObjects.on('requestCompleted', async () => {
-                    for (
-                      let i = 0;
-                      i < DbHandler.getInstance().getWmObjects().length;
-                      i++
-                    ) {
-                      if (
-                        DbHandler.getInstance()
-                          .getWmObjects()
-                          [i].Mac.equals(this.#objectRecord.mac)
-                      ) {
-                        if (
-                          DbHandler.getInstance().getWmObjects()[i].IsActivated
-                        ) {
-                          DbHandler.getInstance().execSql(
-                            queries.SQL_INS_WM_RECORD,
-                            sqlInsWmRecord,
-                            msg,
-                            DbHandler.getInstance().getWmObjects()[i].Id
-                          );
-
-                          this.#client.publish(
-                            common.MQTT_TOPICS[6] +
-                              this.#objectRecord.mac.toString('hex'),
-                            this.getStCmd()
-                          );
-                        } else {
-                          console.log(
-                            LogHandler.getInstance().getLogMessage(
-                              common.LOG_MSG_TYPES.OBJ_NOT_ACT,
-                              DbHandler.getInstance().getWmObjects()[i].Id
-                            )
-                          );
-                        }
-
-                        break;
-                      }
-                    }
-                  });
-
-                  DbHandler.getInstance().execSql(
-                    queries.SQL_SEL_WM_OBJECTS,
-                    sqlSelWmObjects
-                  );
-                }
+                objectRecord.handleMessage();
 
                 break;
 

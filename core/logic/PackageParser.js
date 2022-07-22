@@ -132,7 +132,7 @@ class PackageParser {
      */
     let crc = 0x00;
 
-    for (let j = 0; j < buff.byteLength; j++) {
+    for (let j = 0; j < buff.byteLength - 1; j++) {
       crc += j * buff[j];
 
       while (crc >= 256) {
