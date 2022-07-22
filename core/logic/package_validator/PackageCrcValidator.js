@@ -45,7 +45,7 @@ class PackageCrcValidator extends PackageAbstractValidator {
    * @return {boolean} Boolean.
    */
   isValid(pkg) {
-    if (this.#pkgCrc === PackageParser.getInstance().getCrc(pkg.slice(0, -1))) {
+    if (this.#pkgCrc === PackageParser.getInstance().getCrc(pkg)) {
       return super.isValid(pkg);
     }
 
