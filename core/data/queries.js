@@ -54,6 +54,15 @@ const queries = {
   WHERE
     Id = @Id;
   `,
+
+  SQL_UPD_WM_OBJECT_SETTINGS_BY_ID: `
+  UPDATE
+    ${common.DB_TABLES.WM_OBJECTS}
+  SET
+    Settings = @Settings
+  WHERE
+    Id = @Id;
+  `,
 };
 
 module.exports = queries;

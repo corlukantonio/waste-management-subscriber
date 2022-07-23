@@ -174,6 +174,24 @@ class DbHandler {
 
         break;
 
+      case queries.SQL_UPD_WM_OBJECT_SETTINGS_BY_ID:
+        req.addParameter('Settings', TYPES.VarBinary, args[0], {
+          length: 'max',
+        });
+        req.addParameter('Id', TYPES.Int, args[1]);
+
+        req.on('requestCompleted', async () => {
+          console.log(
+            LogHandler.getInstance().getLogMessage(
+              common.LOG_MSG_TYPES.DB_ROW_UPDATED,
+              common.DB_TABLES.WM_OBJECTS,
+              args[1]
+            )
+          );
+        });
+
+        break;
+
       default:
         break;
     }

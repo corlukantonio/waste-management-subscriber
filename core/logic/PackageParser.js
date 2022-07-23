@@ -93,6 +93,32 @@ class PackageParser {
   }
 
   /**
+   * Get 8 bytes byte array.
+   *
+   * @param {Buffer} buff Buffer.
+   * @return {Array.<Number>} Byte array.
+   */
+  get8BytesByteArr(buff) {
+    /**
+     * Byte array.
+     *
+     * @type {Array.<Number>}
+     */
+    let byteArr = [
+      buff[this.#i++],
+      buff[this.#i++],
+      buff[this.#i++],
+      buff[this.#i++],
+      buff[this.#i++],
+      buff[this.#i++],
+      buff[this.#i++],
+      buff[this.#i++],
+    ];
+
+    return byteArr;
+  }
+
+  /**
    * Get 8 bytes buffer.
    *
    * @param {Buffer} buff Buffer.
@@ -214,6 +240,150 @@ class PackageParser {
     }
 
     return parsedPackage;
+  }
+
+  /**
+   * Get object settings (v1) values length.
+   *
+   * @param {Buffer} buff Buffer.
+   * @return {number} Values length.
+   */
+  getObjectSettingsV1ValuesLength(buff) {
+    /**
+     * Counter.
+     *
+     * @type {number}
+     */
+    let i = 8;
+
+    /**
+     * Length.
+     *
+     * @type {number}
+     */
+    let length = 0;
+
+    /**
+     * Number of values.
+     *
+     * @type {number}
+     */
+    let numberOfValues = buff[i++];
+
+    for (let j = 0; j < numberOfValues; j++) {
+      switch (buff[i]) {
+        case common.STG_TYPES.WASTE_BIN_CAPACITY_LIMIT:
+          i += common.STG_LENGTHS.WASTE_BIN_CAPACITY_LIMIT;
+          length += common.STG_LENGTHS.WASTE_BIN_CAPACITY_LIMIT;
+
+          break;
+
+        default:
+          break;
+      }
+    }
+
+    return length;
+  }
+
+  /**
+   * Get object settings (v1).
+   *
+   * @param {Buffer} buff Buffer.
+   * @return {types.ObjectSettings} Object settings.
+   */
+  getObjectSettings(buff) {
+    /**
+     * Parsed package.
+     *
+     * @type {types.ObjectSettings}
+     */
+    let parsedPackage = {
+      packageType: 0x00,
+      packageVersion: 0x00,
+      mac: Buffer.from([0x00, 0x00, 0x00, 0x00, 0x00, 0x00]),
+      numberOfValues: 0,
+      values: {},
+      crc: 0x00,
+    };
+
+    this.#i = 0;
+
+    if (buff.byteLength > 0) {
+      parsedPackage.packageType = buff[this.#i++];
+      parsedPackage.packageVersion = buff[this.#i++];
+      parsedPackage.mac = this.getMac(buff);
+      parsedPackage.numberOfValues = buff[this.#i++];
+
+      for (let j = 0; j < parsedPackage.numberOfValues; j++) {
+        switch (buff[this.#i]) {
+          case common.STG_TYPES.WASTE_BIN_CAPACITY_LIMIT:
+            this.#i++;
+
+            parsedPackage.values.wasteBinCapacityLimit =
+              this.get8BytesBuffer(buff).readDoubleLE(0);
+
+            break;
+
+          default:
+            break;
+        }
+      }
+
+      parsedPackage.crc = buff[this.#i];
+    }
+
+    return parsedPackage;
+  }
+
+  /**
+   * Get object settings (v1) values.
+   *
+   * @param {Buffer} buff Buffer.
+   * @return {Buffer} Buffer.
+   */
+  getObjectSettingsV1Values(buff) {
+    /**
+     * Byte array.
+     *
+     * @type {Array.<Number>}
+     */
+    let byteArr = [];
+
+    /**
+     * Result.
+     *
+     * @type {Buffer}
+     */
+    let res = Buffer.from([0x00]);
+
+    this.#i = 8;
+
+    /**
+     * Number of values.
+     *
+     * @type {number}
+     */
+    let numberOfValues = buff[this.#i++];
+
+    byteArr.push(numberOfValues);
+
+    for (let j = 0; j < numberOfValues; j++) {
+      switch (buff[this.#i]) {
+        case common.STG_TYPES.WASTE_BIN_CAPACITY_LIMIT:
+          byteArr.push(buff[this.#i++]);
+          byteArr = byteArr.concat(this.get8BytesByteArr(buff));
+
+          break;
+
+        default:
+          break;
+      }
+    }
+
+    res = Buffer.from(byteArr);
+
+    return res;
   }
 
   /**

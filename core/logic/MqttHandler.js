@@ -11,6 +11,7 @@ const LogHandler = require('../logic/LogHandler');
 const ObjectActivationRequest = require('./mqtt_message_handler/ObjectActivationRequest');
 const ObjectRecord = require('./mqtt_message_handler/ObjectRecord');
 const ObjectRegistrationRequest = require('./mqtt_message_handler/ObjectRegistrationRequest');
+const ObjectSettings = require('./mqtt_message_handler/ObjectSettings');
 
 // Core - Data
 const common = require('../data/common');
@@ -29,38 +30,38 @@ class MqttHandler {
    */
   static #instance;
 
-  /**
-   * URL.
-   *
-   * @type {string}
-   */
-  #url = process.env.CLOUDMQTT_URL || 'mqtt://localhost:1883';
-
-  /**
-   * MQTT client.
-   *
-   * @type {mqtt.Client}
-   */
-  #client = mqtt.connect(this.#url);
-
   // /**
-  //  * MQTT server URL.
+  //  * URL.
   //  *
   //  * @type {string}
   //  */
-  // #url = 'mqtt://driver.cloudmqtt.com';
+  // #url = process.env.CLOUDMQTT_URL || 'mqtt://localhost:1883';
 
   // /**
   //  * MQTT client.
   //  *
   //  * @type {mqtt.Client}
   //  */
-  // #client = mqtt.connect(this.#url, {
-  //   clean: true,
-  //   port: 18850,
-  //   username: 'oxiztsaz',
-  //   password: 'fYBafc9Fy6pZ',
-  // });
+  // #client = mqtt.connect(this.#url);
+
+  /**
+   * MQTT server URL.
+   *
+   * @type {string}
+   */
+  #url = 'mqtt://driver.cloudmqtt.com';
+
+  /**
+   * MQTT client.
+   *
+   * @type {mqtt.Client}
+   */
+  #client = mqtt.connect(this.#url, {
+    clean: true,
+    port: 18850,
+    username: 'oxiztsaz',
+    password: 'fYBafc9Fy6pZ',
+  });
 
   /**
    * @private
@@ -108,7 +109,7 @@ class MqttHandler {
         )
       );
 
-      this.#client.subscribe(common.MQTT_TOPICS.slice(0, 6), async () => {
+      this.#client.subscribe(common.MQTT_TOPICS.slice(0, 7), async () => {
         this.#client.on('message', async (topic, msg) => {
           if (msg.byteLength > 0) {
             switch (topic) {
@@ -139,6 +140,18 @@ class MqttHandler {
                 break;
 
               case common.MQTT_TOPICS[2]:
+                /**
+                 * Object settings.
+                 *
+                 * @type {ObjectSettings}
+                 */
+                let objectSettings = new ObjectSettings(msg);
+
+                objectSettings.handleMessage();
+
+                break;
+
+              case common.MQTT_TOPICS[3]:
                 if (msg[0] === common.PKG_TYPES.OBJ_REC_CFG_REQ_PKG) {
                   if (msg[1] === 0x01) {
                   }
@@ -146,7 +159,7 @@ class MqttHandler {
 
                 break;
 
-              case common.MQTT_TOPICS[3]:
+              case common.MQTT_TOPICS[4]:
                 if (msg[0] === common.PKG_TYPES.OBJ_REC_CFG_APV_REQ_PKG) {
                   if (msg[1] === 0x01) {
                   }
@@ -154,7 +167,7 @@ class MqttHandler {
 
                 break;
 
-              case common.MQTT_TOPICS[4]:
+              case common.MQTT_TOPICS[5]:
                 /**
                  * Object record.
                  *

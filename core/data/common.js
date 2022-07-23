@@ -34,6 +34,7 @@ const common = {
   MQTT_TOPICS: [
     'iot/wm/devreg',
     'iot/wm/devact',
+    'iot/wm/devstg',
     'iot/wm/reccfg',
     'iot/wm/recapp',
     'iot/wm/record',
@@ -44,9 +45,10 @@ const common = {
   PKG_TYPES: {
     OBJ_REG_REQ_PKG: 0x01,
     OBJ_ACT_REQ_PKG: 0x02,
-    OBJ_REC_CFG_REQ_PKG: 0x03,
-    OBJ_REC_CFG_APV_REQ_PKG: 0x04,
-    OBJ_REC_BASE_PKG: 0x05,
+    OBJ_STG_PKG: 0x03,
+    OBJ_REC_CFG_REQ_PKG: 0x04,
+    OBJ_REC_CFG_APV_REQ_PKG: 0x05,
+    OBJ_REC_BASE_PKG: 0x06,
   },
 
   PKG_VERSIONS: {
@@ -57,6 +59,7 @@ const common = {
     V1: {
       OBJ_REG_REQ_PKG: 15,
       OBJ_ACT_REQ_PKG: 19,
+      OBJ_STG_PKG: 10,
       OBJ_REC_BASE_PKG: 18,
     },
   },
@@ -71,6 +74,14 @@ const common = {
     DISTANCE: 9,
     HUMIDITY: 9,
     TEMPERATURE_CELSIUS: 9,
+  },
+
+  STG_TYPES: {
+    WASTE_BIN_CAPACITY_LIMIT: 0x01,
+  },
+
+  STG_LENGTHS: {
+    WASTE_BIN_CAPACITY_LIMIT: 9,
   },
 };
 

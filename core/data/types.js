@@ -27,6 +27,7 @@
  * @type {object}
  * @prop {number} OBJ_REG_REQ_PKG - ObjectRegistrationRequestPackage.
  * @prop {number} OBJ_ACT_REQ_PKG - ObjectActivationRequestPackage.
+ * @prop {number} OBJ_STG_PKG - ObjectSettingsPackage.
  * @prop {number} OBJ_REC_CFG_REQ_PKG - ObjectRecordConfigRequestPackage.
  * @prop {number} OBJ_REC_CFG_APV_REQ_PKG - ObjectRecordConfigApprovalRequestPackage.
  * @prop {number} OBJ_REC_BASE_PKG - ObjectRecordBasePackage.
@@ -42,9 +43,10 @@
  * @typedef PackageLengths
  * @type {object}
  * @prop {object} V1 - Version 1.
- * @prop {number} V1.OBJ_REG_REQ_PKG - ObjectRegistrationRequestPackage.
- * @prop {number} V1.OBJ_ACT_REQ_PKG - ObjectActivationRequestPackage.
- * @prop {number} V1.OBJ_REC_BASE_PKG - ObjectRecordBasePackage.
+ * @prop {number} V1.OBJ_REG_REQ_PKG - ObjectRegistrationRequestPackage length.
+ * @prop {number} V1.OBJ_ACT_REQ_PKG - ObjectActivationRequestPackage length.
+ * @prop {number} V1.OBJ_STG_PKG - ObjectSettingsPackage length.
+ * @prop {number} V1.OBJ_REC_BASE_PKG - ObjectRecordBasePackage length.
  */
 
 /**
@@ -64,6 +66,18 @@
  */
 
 /**
+ * @typedef SettingsTypes
+ * @type {object}
+ * @prop {number} WASTE_BIN_CAPACITY_LIMIT - Waste bin capacity limit.
+ */
+
+/**
+ * @typedef SettingsLengths
+ * @type {object}
+ * @prop {number} WASTE_BIN_CAPACITY_LIMIT - Waste bin capacity limit.
+ */
+
+/**
  * @typedef Common
  * @type {object}
  * @prop {DbTables} DB_TABLES - Database tables.
@@ -74,6 +88,8 @@
  * @prop {PackageLengths} PKG_LENGTHS - Package lengths.
  * @prop {ValueTypes} VAL_TYPES - Value types.
  * @prop {ValueLengths} VAL_LENGTHS - Value lengths.
+ * @prop {SettingsTypes} STG_TYPES - Settings types.
+ * @prop {SettingsLengths} STG_LENGTHS - Settings lengths.
  */
 
 /**
@@ -118,6 +134,17 @@
  * @prop {Buffer} mac - MAC.
  * @prop {Array.<Number>} rtc - RTC.
  * @prop {Buffer} activationCode - Activation code.
+ * @prop {number} crc - CRC.
+ */
+
+/**
+ * @typedef ObjectSettings
+ * @prop {number} packageType - Package type.
+ * @prop {number} packageVersion - Package version.
+ * @prop {Buffer} mac - MAC.
+ * @prop {number} numberOfValues - Number of values.
+ * @prop {object} values - Values.
+ * @prop {number} [values.wasteBinCapacityLimit] - Waste bin capacity limit (optional).
  * @prop {number} crc - CRC.
  */
 
