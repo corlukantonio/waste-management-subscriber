@@ -15,7 +15,6 @@ const ObjectSettings = require('./mqtt_message_handler/ObjectSettings');
 
 // Core - Data
 const common = require('../data/common');
-const types = require('../data/types');
 
 //#endregion
 

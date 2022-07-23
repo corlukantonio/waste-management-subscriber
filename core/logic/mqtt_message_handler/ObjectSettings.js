@@ -108,6 +108,16 @@ class ObjectSettings extends MqttMessageHandler {
               PackageParser.getInstance().getObjectSettingsV1Values(this.#msg),
               DbHandler.getInstance().getWmObjects()[i].Id
             );
+
+            /**
+             * Settings values.
+             *
+             * @type {types.SettingsValues}
+             */
+            let settingsValues =
+              PackageParser.getInstance().getObjectSettingsV1ValuesPkg(
+                this.#msg
+              );
           } else {
             console.log(
               LogHandler.getInstance().getLogMessage(

@@ -107,6 +107,14 @@
  */
 
 /**
+ * @typedef SettingsValues
+ * @type {object}
+ * @prop {number} numberOfValues - Number of values.
+ * @prop {object} values - Values.
+ * @prop {number} [values.wasteBinCapacityLimit] - Waste bin capacity limit (optional).
+ */
+
+/**
  * @typedef WmObject
  * @type {object}
  * @prop {number} Id - ID.
