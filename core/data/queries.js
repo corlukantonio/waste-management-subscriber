@@ -19,6 +19,14 @@ const queries = {
     ${common.DB_TABLES.WM_OBJECTS};
   `,
 
+  SQL_SEL_WM_OBJECTS_WASTE_BIN_FOR_EMPTYING: `
+  SELECT
+    Id,
+    WmObjectId
+  FROM
+    ${common.DB_TABLES.WM_OBJECTS_WASTE_BIN_FOR_EMPTYING};
+  `,
+
   SQL_INS_WM_OBJECT: `
   INSERT INTO
     ${common.DB_TABLES.WM_OBJECTS} (
@@ -32,6 +40,17 @@ const queries = {
     INSERTED.Id
   VALUES
     (@Guid, @Mac, @Name, @ActivationCode, @WmGroupId);
+  `,
+
+  SQL_INS_WM_OBJECT_WASTE_BIN_FOR_EMPTYING: `
+  INSERT INTO
+    ${common.DB_TABLES.WM_OBJECTS_WASTE_BIN_FOR_EMPTYING} (
+      WmObjectId
+    )
+  OUTPUT
+    INSERTED.Id
+  VALUES
+    (@WmObjectId);
   `,
 
   SQL_INS_WM_RECORD: `

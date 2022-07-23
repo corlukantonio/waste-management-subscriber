@@ -15,6 +15,7 @@ const types = require('./types');
 const common = {
   DB_TABLES: {
     WM_OBJECTS: 'WmObjects',
+    WM_OBJECTS_WASTE_BIN_FOR_EMPTYING: 'WmObjects_WasteBinForEmptying',
     WM_RECORDS: 'WmRecords',
   },
 
