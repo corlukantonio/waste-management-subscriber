@@ -403,7 +403,7 @@ class PackageParser {
       values: {},
     };
 
-    this.#i = 8;
+    this.#i = 0;
 
     settingsValues.numberOfValues = buff[this.#i++];
 

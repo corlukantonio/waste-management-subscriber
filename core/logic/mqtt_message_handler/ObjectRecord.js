@@ -44,11 +44,25 @@ class ObjectRecord extends MqttMessageHandler {
   #sqlSelWmObjects;
 
   /**
+   * Select.
+   *
+   * @type {Request}
+   */
+  #sqlSelWmObjectsWasteBinForEmptying;
+
+  /**
    * Insert.
    *
    * @type {Request}
    */
   #sqlInsWmRecord;
+
+  /**
+   * Insert.
+   *
+   * @type {Request}
+   */
+  #sqlInsWmObjectWasteBinForEmptying;
 
   /**
    * Constructor.
@@ -125,8 +139,22 @@ class ObjectRecord extends MqttMessageHandler {
       }
     );
 
+    this.#sqlSelWmObjectsWasteBinForEmptying = new Request(
+      queries.SQL_SEL_WM_OBJECTS_WASTE_BIN_FOR_EMPTYING,
+      async (err) => {
+        if (err) console.log(err.message);
+      }
+    );
+
     this.#sqlInsWmRecord = new Request(
       queries.SQL_INS_WM_RECORD,
+      async (err) => {
+        if (err) console.log(err.message);
+      }
+    );
+
+    this.#sqlInsWmObjectWasteBinForEmptying = new Request(
+      queries.SQL_INS_WM_OBJECT_WASTE_BIN_FOR_EMPTYING,
       async (err) => {
         if (err) console.log(err.message);
       }
@@ -144,6 +172,76 @@ class ObjectRecord extends MqttMessageHandler {
       for (let i = 0; i < DbHandler.getInstance().getWmObjects().length; i++) {
         if (DbHandler.getInstance().getWmObjects()[i].Mac.equals(pkg.mac)) {
           if (DbHandler.getInstance().getWmObjects()[i].IsActivated) {
+            this.#sqlInsWmRecord.on('requestCompleted', async () => {
+              this.#sqlSelWmObjectsWasteBinForEmptying.on(
+                'requestCompleted',
+                async () => {
+                  /**
+                   * Settings values.
+                   *
+                   * @type {types.SettingsValues}
+                   */
+                  let settingsValues =
+                    PackageParser.getInstance().getObjectSettingsV1ValuesPkg(
+                      DbHandler.getInstance().getWmObjects()[i].Settings
+                    );
+
+                  if (
+                    pkg.values.distance !== undefined &&
+                    settingsValues.values.wasteBinCapacityLimit !== undefined
+                  ) {
+                    if (
+                      pkg.values.distance <
+                      settingsValues.values.wasteBinCapacityLimit
+                    ) {
+                      /**
+                       * Boolean.
+                       *
+                       * @type {boolean}
+                       */
+                      let isObjectDuplicate = false;
+
+                      for (
+                        let j = 0;
+                        j <
+                        DbHandler.getInstance().getWmObjectsWasteBinForEmptying()
+                          .length;
+                        j++
+                      ) {
+                        if (
+                          DbHandler.getInstance().getWmObjects()[i].Id ===
+                          DbHandler.getInstance().getWmObjectsWasteBinForEmptying()[
+                            j
+                          ].WmObjectId
+                        ) {
+                          isObjectDuplicate = true;
+                        }
+                      }
+
+                      if (!isObjectDuplicate) {
+                        DbHandler.getInstance().execSql(
+                          queries.SQL_INS_WM_OBJECT_WASTE_BIN_FOR_EMPTYING,
+                          this.#sqlInsWmObjectWasteBinForEmptying,
+                          DbHandler.getInstance().getWmObjects()[i].Id
+                        );
+                      } else {
+                        console.log(
+                          LogHandler.getInstance().getLogMessage(
+                            common.LOG_MSG_TYPES.OBJ_DUPLICATE
+                          )
+                        );
+                      }
+                    }
+                  }
+                }
+              );
+
+              DbHandler.getInstance().execSql(
+                queries.SQL_SEL_WM_OBJECTS_WASTE_BIN_FOR_EMPTYING,
+                this.#sqlSelWmObjectsWasteBinForEmptying
+              );
+            });
+
             DbHandler.getInstance().execSql(
               queries.SQL_INS_WM_RECORD,
               this.#sqlInsWmRecord,

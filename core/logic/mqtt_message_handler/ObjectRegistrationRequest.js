@@ -130,6 +130,11 @@ class ObjectRegistrationRequest extends MqttMessageHandler {
    */
   doMain(pkg) {
     this.#sqlSelWmObjects.on('requestCompleted', async () => {
+      /**
+       * Boolean.
+       *
+       * @type {boolean}
+       */
       let isObjectDuplicate = false;
 
       for (let i = 0; i < DbHandler.getInstance().getWmObjects().length; i++) {

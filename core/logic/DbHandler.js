@@ -60,6 +60,13 @@ class DbHandler {
   #wmObjects = [];
 
   /**
+   * WmObjects_WasteBinForEmptying.
+   *
+   * @type {Array.<types.WmObjectWasteBinForEmptying>}
+   */
+  #wmObjectsWasteBinForEmptying = [];
+
+  /**
    * @private
    */
   constructor() {
@@ -69,6 +76,14 @@ class DbHandler {
      * @return {Array.<types.WmObject>} WmObjects.
      */
     this.getWmObjects = () => this.#wmObjects;
+
+    /**
+     * Get WmObjects_WasteBinForEmptying.
+     *
+     * @return {Array.<types.WmObjectWasteBinForEmptying>} WmObjects_WasteBinForEmptying.
+     */
+    this.getWmObjectsWasteBinForEmptying = () =>
+      this.#wmObjectsWasteBinForEmptying;
   }
 
   /**
@@ -109,6 +124,18 @@ class DbHandler {
 
         break;
 
+      case queries.SQL_SEL_WM_OBJECTS_WASTE_BIN_FOR_EMPTYING:
+        this.#wmObjectsWasteBinForEmptying = [];
+
+        req.on('row', async (columns) => {
+          this.#wmObjectsWasteBinForEmptying.push({
+            Id: columns[0].value,
+            WmObjectId: columns[1].value,
+          });
+        });
+
+        break;
+
       case queries.SQL_INS_WM_OBJECT:
         req.addParameter('Guid', TYPES.Binary, args[0], { length: 36 });
         req.addParameter('Mac', TYPES.Binary, args[1], { length: 6 });
@@ -127,6 +154,27 @@ class DbHandler {
                 LogHandler.getInstance().getLogMessage(
                   common.LOG_MSG_TYPES.DB_ROW_INSERTED,
                   common.DB_TABLES.WM_OBJECTS,
+                  column.value
+                )
+              );
+            }
+          });
+        });
+
+        break;
+
+      case queries.SQL_INS_WM_OBJECT_WASTE_BIN_FOR_EMPTYING:
+        req.addParameter('WmObjectId', TYPES.Int, args[0]);
+
+        req.on('row', async (columns) => {
+          columns.forEach(async (column) => {
+            if (column.value === null) {
+              console.log('NULL');
+            } else {
+              console.log(
+                LogHandler.getInstance().getLogMessage(
+                  common.LOG_MSG_TYPES.DB_ROW_INSERTED,
+                  common.DB_TABLES.WM_OBJECTS_WASTE_BIN_FOR_EMPTYING,
                   column.value
                 )
               );

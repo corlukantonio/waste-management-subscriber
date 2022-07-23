@@ -4,6 +4,7 @@
  * @typedef DbTables
  * @type {object}
  * @prop {string} WM_OBJECTS - WmObjects.
+ * @prop {string} WM_OBJECTS_WASTE_BIN_FOR_EMPTYING - WmObjects_WasteBinForEmptying.
  * @prop {string} WM_RECORDS - WmRecords.
  */
 
@@ -122,6 +123,13 @@
  * @prop {boolean} IsActivated - Is activated.
  * @prop {Buffer} ActivationCode - Activation code.
  * @prop {Buffer} Settings - Settings.
+ */
+
+/**
+ * @typedef WmObjectWasteBinForEmptying
+ * @type {object}
+ * @prop {number} Id - ID.
+ * @prop {number} WmObjectId - Object ID.
  */
 
 /**
