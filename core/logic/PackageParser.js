@@ -387,6 +387,46 @@ class PackageParser {
   }
 
   /**
+   * Get object settings (v1) values package.
+   *
+   * @param {Buffer} buff Buffer.
+   * @return {types.SettingsValues} Settings values.
+   */
+  getObjectSettingsV1ValuesPkg(buff) {
+    /**
+     * Settings values.
+     *
+     * @type {types.SettingsValues}
+     */
+    let settingsValues = {
+      numberOfValues: 0x00,
+      values: {},
+    };
+
+    this.#i = 8;
+
+    settingsValues.numberOfValues = buff[this.#i++];
+
+    for (let j = 0; j < settingsValues.numberOfValues; j++) {
+      switch (buff[this.#i]) {
+        case common.STG_TYPES.WASTE_BIN_CAPACITY_LIMIT:
+          this.#i++;
+
+          settingsValues.values.wasteBinCapacityLimit = Buffer.from(
+            this.get8BytesBuffer(buff)
+          ).readDoubleLE(0);
+
+          break;
+
+        default:
+          break;
+      }
+    }
+
+    return settingsValues;
+  }
+
+  /**
    * Get object record (v1) values length.
    *
    * @param {Buffer} buff Buffer.
