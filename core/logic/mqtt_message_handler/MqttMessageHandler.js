@@ -117,7 +117,7 @@ class MqttMessageHandler {
       /**
        * Package.
        *
-       * @type {types.ObjectActivationRequest | types.ObjectRecord | types.ObjectRegistrationRequest}
+       * @type {types.ObjectActivationRequest | types.ObjectRecord | types.ObjectRegistrationRequest | types.ObjectSettings}
        */
       let pkg = this.getPackage();
 
@@ -154,7 +154,7 @@ class MqttMessageHandler {
    * Get package.
    *
    * @protected
-   * @return {types.ObjectActivationRequest | types.ObjectRecord | types.ObjectRegistrationRequest} Package.
+   * @return {types.ObjectActivationRequest | types.ObjectRecord | types.ObjectRegistrationRequest | types.ObjectSettings} Package.
    */
   getPackage() {
     throw new Error('Needs to be implemented by the subclass.');
@@ -172,7 +172,7 @@ class MqttMessageHandler {
   /**
    * Do main.
    *
-   * @param {types.ObjectActivationRequest | types.ObjectRecord | types.ObjectRegistrationRequest} pkg Package.
+   * @param {types.ObjectActivationRequest | types.ObjectRecord | types.ObjectRegistrationRequest | types.ObjectSettings} pkg Package.
    * @return {void}
    */
   doMain(pkg) {

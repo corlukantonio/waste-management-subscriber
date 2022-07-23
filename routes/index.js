@@ -25,7 +25,7 @@ MqttHandler.getInstance().connect();
 router.get('/', (req, res, next) => {
   let config = url.parse(MqttHandler.getInstance().getUrl());
 
-  config.topic = common.MQTT_TOPICS[5];
+  config.topic = common.MQTT_TOPICS[6];
 
   res.render('index', {
     connected: MqttHandler.getInstance().getClient().connected,
@@ -41,7 +41,7 @@ router.post('/publish', async (req, res) => {
 
   MqttHandler.getInstance()
     .getClient()
-    .publish(common.MQTT_TOPICS[5], msg, async () => {
+    .publish(common.MQTT_TOPICS[6], msg, async () => {
       res.writeHead(204, { Connection: 'keep-alive' });
       res.end();
     });
@@ -66,7 +66,7 @@ router.get('/stream', async (req, res) => {
   MqttHandler.getInstance()
     .getClient()
     .on('message', async (topic, msg, pkt) => {
-      if (topic == common.MQTT_TOPICS[5]) {
+      if (topic == common.MQTT_TOPICS[6]) {
         let json = JSON.parse(msg.toString());
         res.write('data: ' + json.date + ': ' + json.msg + '\n\n');
       }

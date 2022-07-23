@@ -2,7 +2,6 @@
 
 //#region Imports
 
-const mqtt = require('mqtt');
 const { Request } = require('tedious');
 
 // Core - Logic
@@ -21,14 +20,7 @@ const types = require('../../data/types');
 /**
  * @extends MqttMessageHandler
  */
-class ObjectRecord extends MqttMessageHandler {
-  /**
-   * MQTT client.
-   *
-   * @type {mqtt.Client}
-   */
-  #mqttClient;
-
+class ObjectSettings extends MqttMessageHandler {
   /**
    * Message.
    *
@@ -44,72 +36,38 @@ class ObjectRecord extends MqttMessageHandler {
   #sqlSelWmObjects;
 
   /**
-   * Insert.
+   * Update.
    *
    * @type {Request}
    */
-  #sqlInsWmRecord;
+  #sqlUpdWmObjectSettingsById;
 
   /**
    * Constructor.
    *
-   * @param {mqtt.Client} mqttClient MQTT client.
    * @param {Buffer} msg Message.
    */
-  constructor(mqttClient, msg) {
+  constructor(msg) {
     super(
       msg,
-      common.PKG_TYPES.OBJ_REC_BASE_PKG,
+      common.PKG_TYPES.OBJ_STG_PKG,
       common.PKG_VERSIONS.V1,
-      common.PKG_LENGTHS.V1.OBJ_REC_BASE_PKG +
-        PackageParser.getInstance().getObjectRecordV1ValuesLength(msg),
+      common.PKG_LENGTHS.V1.OBJ_STG_PKG +
+        PackageParser.getInstance().getObjectSettingsV1ValuesLength(msg),
       msg.slice(-1).readUint8()
     );
 
-    this.#mqttClient = mqttClient;
-
     this.#msg = msg;
-  }
-
-  /**
-   * Get set time command.
-   *
-   * @return {string} Set time command.
-   */
-  getStCmd() {
-    /**
-     * Set time command.
-     *
-     * @type {string}
-     */
-    let stCmd = '';
-
-    /**
-     * Date.
-     *
-     * @type {Date}
-     */
-    let date = new Date(Date.now());
-
-    stCmd += 'st ';
-    stCmd += date.getUTCFullYear() + ' ';
-    stCmd += date.getUTCMonth() + 1 + ' ';
-    stCmd += date.getUTCDate() + ' ';
-    stCmd += date.getUTCHours() + ' ';
-    stCmd += date.getUTCMinutes() + ' ';
-    stCmd += date.getUTCSeconds();
-
-    return stCmd;
   }
 
   /**
    * Get package.
    *
    * @protected
-   * @return {types.ObjectRecord} Package.
+   * @return {types.ObjectSettings} Package.
    */
   getPackage() {
-    return PackageParser.getInstance().getObjectRecordV1(this.#msg);
+    return PackageParser.getInstance().getObjectSettings(this.#msg);
   }
 
   /**
@@ -125,8 +83,8 @@ class ObjectRecord extends MqttMessageHandler {
       }
     );
 
-    this.#sqlInsWmRecord = new Request(
-      queries.SQL_INS_WM_RECORD,
+    this.#sqlUpdWmObjectSettingsById = new Request(
+      queries.SQL_UPD_WM_OBJECT_SETTINGS_BY_ID,
       async (err) => {
         if (err) console.log(err.message);
       }
@@ -136,7 +94,7 @@ class ObjectRecord extends MqttMessageHandler {
   /**
    * Do main.
    *
-   * @param {types.ObjectRecord} pkg Package.
+   * @param {types.ObjectSettings} pkg Package.
    * @return {void}
    */
   doMain(pkg) {
@@ -145,15 +103,10 @@ class ObjectRecord extends MqttMessageHandler {
         if (DbHandler.getInstance().getWmObjects()[i].Mac.equals(pkg.mac)) {
           if (DbHandler.getInstance().getWmObjects()[i].IsActivated) {
             DbHandler.getInstance().execSql(
-              queries.SQL_INS_WM_RECORD,
-              this.#sqlInsWmRecord,
-              this.#msg,
+              queries.SQL_UPD_WM_OBJECT_SETTINGS_BY_ID,
+              this.#sqlUpdWmObjectSettingsById,
+              PackageParser.getInstance().getObjectSettingsV1Values(this.#msg),
               DbHandler.getInstance().getWmObjects()[i].Id
-            );
-
-            this.#mqttClient.publish(
-              common.MQTT_TOPICS[7] + pkg.mac.toString('hex'),
-              this.getStCmd()
             );
           } else {
             console.log(
@@ -176,4 +129,4 @@ class ObjectRecord extends MqttMessageHandler {
   }
 }
 
-module.exports = ObjectRecord;
+module.exports = ObjectSettings;
