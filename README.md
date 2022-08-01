@@ -10,6 +10,8 @@
   <img src="https://user-images.githubusercontent.com/32845849/182177663-59b6a74b-49cd-4e14-b37c-fad5b76c1534.png" alt="waste-management-cloud-scheme-v2-subscriber">
 </p>
 
+**Figure 1.** - Waste Management System
+
 ## How to run it?
 
 Before you start doing any of the following, make sure you have [**Node.js**](https://nodejs.org) installed either on your computer or the server on which you're going to run the application.
