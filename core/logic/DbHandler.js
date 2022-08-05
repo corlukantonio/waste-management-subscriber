@@ -40,6 +40,7 @@ class DbHandler {
       },
     },
     options: {
+      trustServerCertificate: true,
       encrypt: true,
       database: 'waste-management-db',
     },
@@ -67,6 +68,13 @@ class DbHandler {
   #wmObjectsWasteBinForEmptying = [];
 
   /**
+   * Execute procedure.
+   *
+   * @type {Request}
+   */
+  #sqlExecWmTriggerWasteBinEmptying;
+
+  /**
    * @private
    */
   constructor() {
@@ -84,6 +92,13 @@ class DbHandler {
      */
     this.getWmObjectsWasteBinForEmptying = () =>
       this.#wmObjectsWasteBinForEmptying;
+
+    this.#sqlExecWmTriggerWasteBinEmptying = new Request(
+      queries.SQL_EXEC_WM_TRIGGER_WASTE_BIN_EMPTYING,
+      async (err) => {
+        if (err) console.log(err.message);
+      }
+    );
   }
 
   /**
@@ -109,6 +124,13 @@ class DbHandler {
    */
   execSql(query, req, ...args) {
     switch (query) {
+      case queries.SQL_EXEC_WM_TRIGGER_WASTE_BIN_EMPTYING:
+        req.on('row', async (columns) => {
+          console.log('Return value of the procedure: ' + columns[0].value);
+        });
+
+        break;
+
       case queries.SQL_SEL_WM_OBJECTS:
         this.#wmObjects = [];
 
@@ -273,6 +295,24 @@ class DbHandler {
     });
 
     this.#conn.connect();
+
+    /**
+     * Triggering Power Apps.
+     */
+
+    setInterval(async () => {
+      this.#sqlExecWmTriggerWasteBinEmptying = new Request(
+        queries.SQL_EXEC_WM_TRIGGER_WASTE_BIN_EMPTYING,
+        async (err) => {
+          if (err) console.log(err.message);
+        }
+      );
+
+      this.execSql(
+        queries.SQL_EXEC_WM_TRIGGER_WASTE_BIN_EMPTYING,
+        this.#sqlExecWmTriggerWasteBinEmptying
+      );
+    }, 3600000);
   }
 
   /**
