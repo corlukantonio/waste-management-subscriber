@@ -8,6 +8,12 @@ const common = require('./common');
 //#endregion
 
 const queries = {
+  SQL_EXEC_WM_TRIGGER_WASTE_BIN_EMPTYING: `
+  DECLARE @returnValue INT
+  EXEC @returnValue = WmTriggerWasteBinEmptying
+  SELECT 'Return Value' = @returnValue;
+  `,
+
   SQL_SEL_WM_OBJECTS: `
   SELECT
     Id,

@@ -103,6 +103,7 @@
  * @prop {string} authentication.options.userName - Username.
  * @prop {string} authentication.options.password - Password.
  * @prop {object} options - Options.
+ * @prop {boolean} options.trustServerCertificate - Trust server certificate.
  * @prop {boolean} options.encrypt - Encrypt.
  * @prop {string} options.database - Database.
  */

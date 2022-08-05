@@ -12,6 +12,7 @@ const MqttHandler = require('../core/logic/MqttHandler');
 
 // Core - Data
 const common = require('../core/data/common');
+const queries = require('../core/data/queries');
 
 //#endregion
 
