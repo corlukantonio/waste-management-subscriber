@@ -7,10 +7,12 @@
 **Waste Management Subscriber** is an intermediary between the IoT device and the database. It connects to an MQTT broker and subscribes to specific topics on which packages arrive from IoT devices. Then it is the subscriber's responsibility to check the validity of each package as it arrives and store it in the database. The figure below shows where it is located in the system along with other components.
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/32845849/182177663-59b6a74b-49cd-4e14-b37c-fad5b76c1534.png" alt="waste-management-cloud-scheme-v2-subscriber">
+  <img src="https://user-images.githubusercontent.com/32845849/183228312-2c60941c-84e4-4120-b6f3-329bfdfd8a32.png" alt="waste-management-cloud-scheme-v3">
 </p>
 
-**Figure 1.** - Waste Management System
+<p align="center">
+  <i><b>Figure 1.</b> - Waste Management System</i>
+</p>
 
 ## How to run it?
 
