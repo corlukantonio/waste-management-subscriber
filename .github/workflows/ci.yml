@@ -30,6 +30,3 @@ jobs:
 
       - name: Run tests
         run: npm test
-
-notifications:
-  email: false
