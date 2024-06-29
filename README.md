@@ -15,6 +15,8 @@
   <i><b>Figure 1.</b> - Waste Management System</i>
 </p>
 
+Video goes here...
+
 ## How to run it?
 
 Before you start doing any of the following, make sure you have [**Node.js**](https://nodejs.org) installed either on your computer or the server on which you're going to run the application.
