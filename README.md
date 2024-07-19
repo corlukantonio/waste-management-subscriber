@@ -18,6 +18,53 @@
 
 Video goes here...
 
+## Environment variables
+
+The environment variables required for this application are listed and described below.
+
+<table align="center">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>WMS_DB_HOST</td>
+      <td>Database host.</td>
+    </tr>
+    <tr>
+      <td>WMS_DB_NAME</td>
+      <td>Database name.</td>
+    </tr>
+    <tr>
+      <td>WMS_DB_PASSWORD</td>
+      <td>Database password.</td>
+    </tr>
+    <tr>
+      <td>WMS_DB_USER</td>
+      <td>Database user.</td>
+    </tr>
+    <tr>
+      <td>WMS_MQTT_BROKER_PASSWORD</td>
+      <td>MQTT broker password.</td>
+    </tr>
+    <tr>
+      <td>WMS_MQTT_BROKER_PORT</td>
+      <td>MQTT broker port.</td>
+    </tr>
+    <tr>
+      <td>WMS_MQTT_BROKER_URL</td>
+      <td>MQTT broker URL.</td>
+    </tr>
+    <tr>
+      <td>WMS_MQTT_BROKER_USER</td>
+      <td>MQTT broker user.</td>
+    </tr>
+  </tbody>
+</table>
+
 ## How to run it?
 
 Before you start doing any of the following, make sure you have [**Node.js**](https://nodejs.org) installed either on your computer or the server on which you're going to run the application.
