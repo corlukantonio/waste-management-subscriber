@@ -16,7 +16,13 @@
   <i><b>Figure 1.</b> - Waste Management System</i>
 </p>
 
-Video goes here...
+The video below shows what the solution looks like in action.
+
+<p align="center">
+  <a href="https://youtu.be/TOmVYZEeiqY">
+  <img src="https://img.youtube.com/vi/TOmVYZEeiqY/0.jpg" alt="Waste Management">
+  </a>
+</p>
 
 ## Environment variables
 
