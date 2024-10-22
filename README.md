@@ -1,5 +1,6 @@
 # waste-management-subscriber
 
+[![Node.js CI](https://github.com/corlukantonio/waste-management-subscriber/actions/workflows/ci.yml/badge.svg)](https://github.com/corlukantonio/waste-management-subscriber/actions/workflows/ci.yml)
 [![Build Status](https://app.travis-ci.com/corlukantonio/waste-management-subscriber.svg?token=LFYd3nvNM4EhiD43TsCb&branch=main)](https://app.travis-ci.com/corlukantonio/waste-management-subscriber)
 ![GitHub commits since tagged version](https://img.shields.io/github/commits-since/corlukantonio/waste-management-subscriber/v1.0.1/main)
 
@@ -14,6 +15,61 @@
 <p align="center">
   <i><b>Figure 1.</b> - Waste Management System</i>
 </p>
+
+The video below shows what the solution looks like in action.
+
+<p align="center">
+  <a href="https://youtu.be/TOmVYZEeiqY">
+  <img src="https://img.youtube.com/vi/TOmVYZEeiqY/0.jpg" alt="Waste Management">
+  </a>
+</p>
+
+## Environment variables
+
+The environment variables required for this application are listed and described below.
+
+<table align="center">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>WMS_DB_HOST</td>
+      <td>Database host.</td>
+    </tr>
+    <tr>
+      <td>WMS_DB_NAME</td>
+      <td>Database name.</td>
+    </tr>
+    <tr>
+      <td>WMS_DB_PASSWORD</td>
+      <td>Database password.</td>
+    </tr>
+    <tr>
+      <td>WMS_DB_USER</td>
+      <td>Database user.</td>
+    </tr>
+    <tr>
+      <td>WMS_MQTT_BROKER_PASSWORD</td>
+      <td>MQTT broker password.</td>
+    </tr>
+    <tr>
+      <td>WMS_MQTT_BROKER_PORT</td>
+      <td>MQTT broker port.</td>
+    </tr>
+    <tr>
+      <td>WMS_MQTT_BROKER_URL</td>
+      <td>MQTT broker URL.</td>
+    </tr>
+    <tr>
+      <td>WMS_MQTT_BROKER_USER</td>
+      <td>MQTT broker user.</td>
+    </tr>
+  </tbody>
+</table>
 
 ## How to run it?
 
